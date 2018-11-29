@@ -1,0 +1,44 @@
+body {
+  font-family: sans-serif;
+  background-color: var(--grey);
+  color: var(--denim);
+  overflow: hidden;
+}
+
+div.grid {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+div.row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+div.col {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* GLOBAL COLOR SCHEME */
+:root {
+  --prim_one: #262F3D;
+  --prim_two: #4EC0F4;
+  --prim_three: #19212B;
+
+  --text_prim: #C3C5C9;
+
+  --light_primary: #03A9F4;
+  --light_secondary: #E1F5FE;
+  --dark_primary: #37474F;
+
+  --grey_dark: #546E7A;
+  --grey_light:#EEEEEE;
+
+  --blue: #4484CE;
+  --green: #4CAF50;
+  --denim: #1A2930;
+  --grey: #F5F8FB;
+  --yellow: #EBA023;
+  --orange: #F19F4D;
+}
