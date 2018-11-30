@@ -9,8 +9,17 @@ class CreateTab extends Component {
   constructor(props) {
     super(props);
 
+    this.state = {
+      loc: this.props.location.pathname.split("/").pop()
+    }
+
     this.globalStore = this.props.globalStore;
     this.store = ApiDataStore;
+  }
+
+  componentWillReceiveProps(newProps) {
+    // update location state
+    this.setState({loc: newProps.location.pathname.split("/").pop()})
   }
 
   render() {
@@ -27,7 +36,7 @@ class CreateTab extends Component {
     }
 
     return(
-      <div style={{marginLeft: tempOffset}}>this is a hugge test!!!!!!!</div>
+      <div style={{marginLeft: tempOffset}}>Create tab {this.state.loc}</div>
     )
   }    
 }

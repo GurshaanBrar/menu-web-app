@@ -11,11 +11,10 @@ import { RouterStore, syncHistoryWithStore } from 'mobx-react-router';
 import createBrowserHistory from 'history/createBrowserHistory';
 import AppStore from "./App/Stores/AppStore";
 import registerServiceWorker from './registerServiceWorker';
-
-
-// === CSS
 import "./index.css"
-
+import ConsoleHome from "./App/Containers/ConsoleHome/ConsoleHome";
+import AnalyzeTab from "./App/Containers/AnalyzeTab/AnalyzeTab";
+import SettingsTab from "./App/Containers/SettingsTab/SettingsTab";
 
 // router constants
 const browserHistory = createBrowserHistory();
@@ -67,7 +66,10 @@ const app = document.getElementById("root");
             <Switch>
               {/* #~#~#~#~# CONTAINERS #~#~#~#~# */}
               {/*   Add all containers below */}
+              <Route exact path='/console' component={ConsoleHome}></Route>
               <Route path='/console/create' component={CreateTab}></Route>
+              <Route path='/console/analyze' component={AnalyzeTab}></Route>
+              <Route path='/console/settings' component={SettingsTab}></Route>
             </Switch>
           </div>
         </Router>

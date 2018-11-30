@@ -19,7 +19,7 @@ class App extends Component {
         this.mediaQueryChanged = this.mediaQueryChanged.bind(this);
         this.push = this.props.routing.push;
         this.connections = {
-            n1: "home",
+            n1: "",
             n2_s1: "create/photos",
             n2_s2: "create/items",
             n2_s3: "create/menus",
@@ -154,7 +154,7 @@ class App extends Component {
                         <NavIcon>
                             <i className="fa fa-cookie-bite" style={{ color: "#FFCB2C",fontSize: '2em'}} />
                         </NavIcon>
-                        <NavText style={{fontSize:'1.5em'}}>
+                        <NavText style={{fontSize:'1.5em', color:"white"}}>
                             Appetize
                         </NavText>
                     </NavItem>

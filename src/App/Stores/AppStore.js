@@ -14,12 +14,12 @@ export class AppStore {
 
   /* #~#~#~#~#~#~ ACTIONS #~#~#~#~#~#~# */
   @action
-  toggleSideMenuOpen(newVal: boolean) {
+  toggleSideMenuOpen(newVal) {
     this.sideMenuOpen = newVal;
   }
 
   @action
-  toggleSideMenuVisible(newVal: boolean) {
+  toggleSideMenuVisible(newVal) {
     if(!newVal){
       this.sideMenuOpen = false;
     }
@@ -27,7 +27,7 @@ export class AppStore {
   }
 
   @action
-  setActiveTab(newVal: string) {
+  setActiveTab(newVal) {
     this.activeTab = newVal;
   }
 }
