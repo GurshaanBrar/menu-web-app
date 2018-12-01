@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { inject, observer } from "mobx-react";
 import ApiDataStore from '../../Stores/ApiDataStore'
 import './CreateTab.css';
+import Photos from './SubTabs/Photos'
+import Items from './SubTabs/Items';
 
 @inject('globalStore')
 @observer
@@ -29,14 +31,22 @@ class CreateTab extends Component {
       tempOffset = 0;
     }
     else if(this.globalStore.sideMenuOpen) {
-      tempOffset = 241;
+      tempOffset = 240;
     }
     else {
-      tempOffset = 64
+      tempOffset = 64;
     }
 
     return(
-      <div style={{marginLeft: tempOffset}}>Create tab {this.state.loc}</div>
+      <div style={{marginLeft: tempOffset}}>
+      {
+        this.state.loc === 'photos'?
+        (<Photos/>):
+        this.state.loc === 'items'?
+        (<Items/>):
+        (null)
+      }
+      </div>
     )
   }    
 }

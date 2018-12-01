@@ -34,6 +34,29 @@ class App extends Component {
         mql.addListener(this.mediaQueryChanged);
     }
 
+    componentDidMount() {
+        var keys = Object.keys(this.connections);
+        var values = Object.values(this.connections);
+
+        var loc = this.props.location.pathname.split('/');
+        var locNegOne = loc.pop();
+        var locNegTwo = loc.pop();
+
+        var count = 0;
+
+        console.log(locNegTwo, locNegOne)
+
+        for(let el of values) {
+            if(locNegOne === el) {
+                console.log(el);
+            }
+            else if (`${locNegTwo}/${locNegOne}` === el) {
+                console.log(count);
+            }
+            count++;
+        }
+    }
+
     componentWillUnmount() {
         mql.removeListener(this.mediaQueryChanged);
     }

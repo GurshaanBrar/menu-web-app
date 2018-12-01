@@ -10,7 +10,7 @@ export class AppStore {
   /* #~#~#~#~#~#~ OBSERVABLES #~#~#~#~#~#~# */
   @observable sideMenuOpen = true;
   @observable sideMenuVisible = true;
-  @observable activeTab = "n1";
+  @observable activeTab = "";
 
   /* #~#~#~#~#~#~ ACTIONS #~#~#~#~#~#~# */
   @action
