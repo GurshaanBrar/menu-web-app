@@ -2,9 +2,8 @@ import React, { Component } from 'react';
 
 import { Row, Col} from 'react-bootstrap';
 import SearchBar from '../../../Components/SearchBar/SearchBar';
-import ItemPreview from '../../../Components/ItemPreview/ItemPreview';
 
-class Items extends Component {
+class Menus extends Component {
   constructor(props) {
     super(props)
 
@@ -34,8 +33,9 @@ class Items extends Component {
         </Row>
         <Row className="show-grid">
           <Col xs={12} md={12}>
-            <div style={{marginLeft:"5%", marginRight:"5%", marginBottom: "1%", marginTop: "1%", backgroundColor:"blue"}}>
-              <ItemPreview/>            
+            <div style={{margin:"2%"}}>
+            {this.state.searchQuery}
+            {/* Add Photos display here */}
             </div>
           </Col>
         </Row>
@@ -45,4 +45,4 @@ class Items extends Component {
 }
 
 
-export default Items;
+export default Menus;

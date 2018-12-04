@@ -4,6 +4,7 @@ import ApiDataStore from '../../Stores/ApiDataStore'
 import './CreateTab.css';
 import Photos from './SubTabs/Photos'
 import Items from './SubTabs/Items';
+import Menus from './SubTabs/Menus';
 
 @inject('globalStore')
 @observer
@@ -44,6 +45,8 @@ class CreateTab extends Component {
         (<Photos/>):
         this.state.loc === 'items'?
         (<Items/>):
+        this.state.loc === 'menus'?
+        (<Menus/>):
         (null)
       }
       </div>
