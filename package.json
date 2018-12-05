@@ -9,7 +9,6 @@
     "babel-preset-mobx": "^1.0.2",
     "copy-webpack-plugin": "^4.6.0",
     "lodash": "^4.17.11",
-    "mdbreact": "^4.8.4",
     "mobx": "^4.2.1",
     "mobx-react": "^5.1.2",
     "mobx-react-router": "^4.0.3",
@@ -17,6 +16,7 @@
     "react-app-rewire-mobx": "^1.0.8",
     "react-bootstrap": "^0.32.1",
     "react-dom": "^16.4.2",
+    "react-masonry-component": "^6.2.1",
     "react-router-dom": "^4.2.2",
     "react-scripts": "1.1.4"
   },

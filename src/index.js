@@ -15,6 +15,7 @@ import "./index.css"
 import ConsoleHome from "./App/Containers/ConsoleHome/ConsoleHome";
 import AnalyzeTab from "./App/Containers/AnalyzeTab/AnalyzeTab";
 import SettingsTab from "./App/Containers/SettingsTab/SettingsTab";
+import CreateTabStore from './App/Stores/CreateTabStore'
 
 // router constants
 const browserHistory = createBrowserHistory();
@@ -30,6 +31,7 @@ const stores = {
   routing: routingStore,
   // ...other stores
   globalStore: AppStore,
+  CreateTabStore: CreateTabStore,
 };
 
 const history = syncHistoryWithStore(browserHistory, routingStore);

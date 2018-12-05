@@ -16,9 +16,8 @@ class SearchBar extends Component {
     }
 
     sendToParent = () => {
-
         // only send value if it has text
-        if (this.state.value !== "" && this.state.value !== " " ) {
+        if (this.state.value !== " " ) {
             this.props.onChange(this.state.value)
         }
     }
@@ -45,7 +44,7 @@ class SearchBar extends Component {
   }    
 }
 
-SearchBar.PropTypes = {
+SearchBar.propTypes = {
     placeholder: PropTypes.string.isRequired,
     onChange: PropTypes.func.isRequired
 }

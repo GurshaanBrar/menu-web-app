@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import { inject, observer } from "mobx-react";
-import ApiDataStore from '../../Stores/ApiDataStore'
 import './CreateTab.css';
 import Photos from './SubTabs/Photos'
 import Items from './SubTabs/Items';
 import Menus from './SubTabs/Menus';
 
 @inject('globalStore')
+@inject('CreateTabStore')
 @observer
 class CreateTab extends Component {
   constructor(props) {
@@ -17,7 +17,7 @@ class CreateTab extends Component {
     }
 
     this.globalStore = this.props.globalStore;
-    this.store = ApiDataStore;
+    this.store = this.props.CreateTabStore;
   }
 
   componentWillReceiveProps(newProps) {
@@ -39,14 +39,14 @@ class CreateTab extends Component {
     }
 
     return(
-      <div style={{marginLeft: tempOffset}}>
+      <div style={{marginLeft: tempOffset, height:"100%"}}>
       {
         this.state.loc === 'photos'?
-        (<Photos/>):
+        (<Photos store={this.store}/>):
         this.state.loc === 'items'?
-        (<Items/>):
+        (<Items store={this.store}/>):
         this.state.loc === 'menus'?
-        (<Menus/>):
+        (<Menus store={this.store}/>):
         (null)
       }
       </div>

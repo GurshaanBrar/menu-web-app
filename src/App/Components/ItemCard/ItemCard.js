@@ -1,28 +1,25 @@
 import React from 'react';
-import { Button, Card, CardBody, CardImage, CardTitle, CardText, Col } from 'mdbreact';
+import { Thumbnail } from 'react-bootstrap';
+import PropTypes from 'prop-types';
 
 class ItemCard extends React.Component {
+  constructor(props) {
+    super(props);
+
+  }
+
   render() {
     return (
-      <Col>
-        <Card style={{ width: 200, height: 200, backgroundColor:"red"}}>
-          <CardImage
-            className="img-fluid"
-            src="https://mdbootstrap.com/img/Photos/Others/images/43.jpg"
-            waves
-          />
-          <CardBody>
-            <CardTitle>Card title</CardTitle>
-            <CardText>
-              Some quick example text to build on the card title and make
-              up the bulk of the card&apos;s content.
-            </CardText>
-            <Button href="#">Button</Button>
-          </CardBody>
-        </Card>
-      </Col>
+      <Thumbnail onClick={() => alert(`you clicked ${this.props.itemName}`)} src={this.props.uri} alt={this.props.itemName} style={{padding:0, width: '30vh'}}>
+        <h4 style={{textAlign: 'center'}}>{this.props.itemName}</h4>
+      </Thumbnail>
     )
   }
+}
+
+ItemCard.propTypes = {
+  itemName: PropTypes.string.isRequired,
+  uri: PropTypes.string.isRequired
 }
 
 export default ItemCard;

@@ -1,26 +1,37 @@
 import React, { Component } from 'react';
-
 import { Row, Col} from 'react-bootstrap';
 import SearchBar from '../../../Components/SearchBar/SearchBar';
-import ItemPreview from '../../../Components/ItemPreview/ItemPreview';
+import ItemsPreview from '../../../Components/ItemsPreview/ItemsPreview';
 
 class Items extends Component {
   constructor(props) {
     super(props)
 
     this.state = {
-      searchQuery: ""
+      searchQuery: "",
+      displayItems: this.props.store.itemSubStore.items
     }
+    this.store=this.props.store;
   }
 
-  _handleSearch(val) {
-    this.setState({searchQuery:val})
+  // updates the items in display
+  _handleSearch(query) {
+    var list = this.store.itemSubStore.items;
+    var tempArr = [];
+
+    // checks if i.name includes the query
+    for (let i of list) {
+      if(i.name.toLowerCase().includes(query.trim().toLowerCase())) {
+        tempArr.push(i);
+      }
+    }  
+
+    this.setState({displayItems: tempArr})
   }
 
   render() {
-
     return(
-      <div>
+      <div style={{overflowY:'scroll', height:"100vh"}}>
         <Row className="show-grid">
           <Col xs={1} md={2}>
               {/* SPACING */}
@@ -34,8 +45,8 @@ class Items extends Component {
         </Row>
         <Row className="show-grid">
           <Col xs={12} md={12}>
-            <div style={{marginLeft:"5%", marginRight:"5%", marginBottom: "1%", marginTop: "1%", backgroundColor:"blue"}}>
-              <ItemPreview/>            
+            <div style={{marginLeft:"5%", marginRight:"5%", marginBottom: "1%", marginTop: "1%", backgroundColor:"red"}}>
+                <ItemsPreview listOfItems={this.state.displayItems}/>           
             </div>
           </Col>
         </Row>

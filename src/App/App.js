@@ -44,8 +44,6 @@ class App extends Component {
 
         var count = 0;
 
-        console.log(locNegTwo, locNegOne)
-
         for(let el of values) {
             if(locNegOne === el) {
                 console.log(el);
@@ -195,10 +193,10 @@ class App extends Component {
                     {/* n2 */}
                     <NavItem eventKey="n2" onClick={() => this._handleNavItemClick("n2")} style={{backgroundColor: n2_bg}}>
                         <NavIcon >
-                            <i class="fas fa-edit" style={{ fontSize: '1.75em', color: n2}} />
+                            <i className="fas fa-edit" style={{ fontSize: '1.75em', color: n2}} />
                         </NavIcon>
                         <NavText style={{color: n2}}>
-                            Create <i class={`fas fa-chevron-${n2_arrow}`} style={{fontSize: '1em', color: n2, position:"absolute", right:12, marginTop:'7%'}}/>
+                            Create <i className={`fas fa-chevron-${n2_arrow}`} style={{fontSize: '1em', color: n2, position:"absolute", right:12, marginTop:'7%'}}/>
                         </NavText>
                         {/* n2_s1 */}
                         <NavItem eventKey="n2_s1" style={{background: 'var(--prim_three)', marginTop:0}}>
@@ -226,7 +224,7 @@ class App extends Component {
                             <i className="fab fa-think-peaks" style={{ fontSize: '1.75em', color: n3 }} />
                         </NavIcon>
                         <NavText style={{color: n3}}>
-                            Analyze <i class={`fas fa-chevron-${n3_arrow}`} style={{fontSize: '1em', color: n2, position:"absolute", right:12, marginTop:'7%'}}/>
+                            Analyze <i className={`fas fa-chevron-${n3_arrow}`} style={{fontSize: '1em', color: n2, position:"absolute", right:12, marginTop:'7%'}}/>
                         </NavText>
                         {/* n3_s1 */}
                         <NavItem eventKey="n3_s1" style={{background: 'var(--prim_three)', marginTop:0}}>
