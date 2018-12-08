@@ -45,7 +45,7 @@ class Items extends Component {
         </Row>
         <Row className="show-grid">
           <Col xs={12} md={12}>
-            <div style={{marginLeft:"5%", marginRight:"5%", marginBottom: "1%", marginTop: "1%", backgroundColor:"red"}}>
+            <div style={{marginLeft:"5%", marginRight:"5%", marginBottom: "1%", marginTop: "1%"}}>
                 <ItemsPreview listOfItems={this.state.displayItems}/>           
             </div>
           </Col>
