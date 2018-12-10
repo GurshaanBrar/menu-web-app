@@ -6,5 +6,15 @@
 }
 
 .items-preview-modal-cont {
-	width: 55%;
+	width: 80vw;
+}
+
+.items-preview-custom-atag {
+	color: var(--dark_primary);
+	font-weight: bold
+}
+
+.items-preview-custom-atag:hover {
+	color: var(--light_primary);
+	cursor: pointer
 }

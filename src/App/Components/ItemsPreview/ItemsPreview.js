@@ -51,14 +51,29 @@ class ItemsPreview extends Component {
               <Row>
                 <Col xs={12} md={9}>
                     <Image style={{width: '100%', objectFit: 'cover'}} src={this.store.itemSubStore.itemInView.uri}/>
-                    <p>key0: value</p>
-                    <p>key0: value</p>
-                    <p>key0: value</p>
-                    <p>key0: value</p>
-                    <p>key0: value</p>
                 </Col>
-                <Col xs={0} md={3}>
-                  side men
+                <Col xs={0} md={3} style={{color: "#5A626B"}}>
+                  <a className="items-preview-custom-atag">
+                    <Row>
+                      <Col md={10}>
+                        Menus
+                      </Col>
+                      <Col md={2}>
+                        <i className="fas fa-cog"/>
+                      </Col>
+                    </Row>
+                  </a>
+                  <p style={{paddingTop:'4%'}}>
+                    <Row>
+                        <Col md={10}>
+                          Breakfast Menu
+                        </Col>
+                        <Col md={2}>
+                          
+                        </Col>
+                    </Row>
+                  </p>
+                  <hr/>
                 </Col>
               </Row>
             </Modal.Body>
