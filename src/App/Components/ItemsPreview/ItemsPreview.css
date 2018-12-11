@@ -9,6 +9,10 @@
 	width: 80vw;
 }
 
+.item-preview-modal-cont-full {
+	width: 99vw;
+}
+
 .items-preview-custom-atag {
 	color: var(--dark_primary);
 	font-weight: bold

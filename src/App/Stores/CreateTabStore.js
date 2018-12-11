@@ -33,7 +33,7 @@ export class CreateTabStore {
       name: "Lemon Cheesecake"
     },
     {
-      uri: "https://therecipecritic.com/wp-content/uploads/2018/02/blackened_chicken_power_bowl11-1-of-1.jpg",
+      uri: "https://dishingouthealth.com/wp-content/uploads/2016/05/Greekpowerbowl3.jpg",
       name: "For Goodness Sake Power Bowl"
     },
     {
@@ -49,7 +49,7 @@ export class CreateTabStore {
       name: "Medditarian Pizza"
     },
     {
-      uri: "https://tangledwithtaste.com/wp-content/uploads/2018/05/4F8A0276-2.jpg",
+      uri: "https://static01.nyt.com/images/2017/12/13/dining/15COOKING-CREME-BRULEE1/15COOKING-CREME-BRULEE1-articleLarge.jpg",
       name: "Creme Brulee"
     }, 
     {
