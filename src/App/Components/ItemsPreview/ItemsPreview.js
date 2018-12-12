@@ -1,7 +1,6 @@
 // External
 import React, { Component } from 'react';
 import ItemCard from '../ItemCard/ItemCard';
-import ItemModal from '../ItemModal/ItemModal';
 import "./ItemsPreview.css";
 import { inject, observer } from "mobx-react";
 
@@ -18,15 +17,7 @@ class ItemsPreview extends Component {
     this.store = this.props.CreateTabStore
   }
 
-  handleClose() {
-    console.log('closing');
-    
-    this.setState({ show: false });
-  }
 
-  handleShow() {
-    this.setState({ show: true });
-  }
 
   render() {
       return(
@@ -34,15 +25,10 @@ class ItemsPreview extends Component {
         {
           this.props.listOfItems.map(d => {
             return(
-              <ItemCard key={d.uri} itemName={d.name} uri={d.uri} handleShow={this.handleShow.bind(this)}/>
+              <ItemCard key={d.uri} itemName={d.name} uri={d.uri} handleShow={this.props.handleShow}/>
             )
           })
         }
-        <ItemModal
-          itemInView={this.store.itemSubStore.itemInView}
-          handleClose={this.handleClose.bind(this)}
-          show={this.state.show}
-        />
         </div>
       )
     }

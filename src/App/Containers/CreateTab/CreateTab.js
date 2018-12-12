@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { inject, observer } from "mobx-react";
 import './CreateTab.css';
 import Photos from './SubTabs/Photos'
-import Items from './SubTabs/Items';
+import Items from './SubTabs/Items/Items';
 import Menus from './SubTabs/Menus';
 
 @inject('globalStore')

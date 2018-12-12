@@ -1,0 +1,13 @@
+
+.items-add-item {
+    color: #5A626B;
+    width: 50%;
+    padding-top: 6;
+    padding-bottom: 6;
+    /* background-color: red */
+}
+
+.items-add-item:hover {
+    color: var(--light_primary);
+    cursor: pointer
+}

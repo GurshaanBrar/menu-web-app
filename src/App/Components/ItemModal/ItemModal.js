@@ -14,6 +14,7 @@ class ItemsPreview extends Component {
         }
 
         this.mediaQueryChanged = this.mediaQueryChanged.bind(this);
+        this.editIcon = "fas fa-cog";
     }
 
     componentWillMount() {
@@ -59,7 +60,7 @@ class ItemsPreview extends Component {
                                 Name
                             </Col>
                             <Col xs={3} md={2}>
-                                <i className="fas fa-cog"/>
+                                <i className={this.editIcon}/>
                             </Col>
                         </Row>
                     </a>
@@ -78,7 +79,7 @@ class ItemsPreview extends Component {
                                 Description
                             </Col>
                             <Col xs={3} md={2}>
-                                <i className="fas fa-cog"/>
+                                <i className={this.editIcon}/>
                             </Col>
                         </Row>
                     </a>
@@ -97,7 +98,7 @@ class ItemsPreview extends Component {
                                 Price
                             </Col>
                             <Col xs={3} md={2}>
-                                <i className="fas fa-cog"/>
+                                <i className={this.editIcon}/>
                             </Col>
                         </Row>
                     </a>
@@ -116,7 +117,7 @@ class ItemsPreview extends Component {
                                 Image URL
                             </Col>
                             <Col xs={3} md={2}>
-                                <i className="fas fa-cog"/>
+                                <i className={this.editIcon}/>
                             </Col>
                         </Row>
                     </a>
@@ -135,7 +136,7 @@ class ItemsPreview extends Component {
                                 Menus
                             </Col>
                             <Col xs={3} md={2}>
-                                <i className="fas fa-cog"/>
+                                <i className={this.editIcon}/>
                             </Col>
                         </Row>
                     </a>
