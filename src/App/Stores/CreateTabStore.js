@@ -1,18 +1,49 @@
 import { observable, action } from "mobx"
+import RequestHandler from '../Services/RequestHandler';
 
 export class CreateTabStore {
     /* #~#~#~#~#~#~ OBSERVABLES #~#~#~#~#~#~# */
     @observable itemSubStore = {
-      items: items, //All items
+      items: [], //All items
       itemInView: "",
     }
 
     /* #~#~#~#~#~#~ ACTIONS #~#~#~#~#~#~# */
 
+    // Grabs all items from place menu
     @action
-    setItemInView(newItem) {
-      console.log(newItem);
-      
+    getItems(placeId) {
+      RequestHandler.getDocument("Menus", placeId)
+      .then(action("success", res => {
+
+        if(res.exists) {
+          let menu = res.data().menu
+
+          for(let cat of menu) {
+            // store category info
+            let catName = cat.type_header;
+
+            // itr items in category
+            for(let item of cat.items) {
+              let tempObj = {category: catName};
+              let retObj = { ...tempObj, ...item}
+
+              // add item to local data
+              this.itemSubStore.items.push(retObj)
+            }
+          }        
+        }
+        else {
+          console.log("menu does not exist")
+        }        
+      }))
+      .catch(err => {
+        console.log(err);   
+      })
+    }
+    // Changes the item which will appear in modal
+    @action
+    setItemInView(newItem) {     
       this.itemSubStore.itemInView = newItem;
     }
   }

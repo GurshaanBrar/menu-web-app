@@ -25,7 +25,7 @@ class ItemsPreview extends Component {
         {
           this.props.listOfItems.map(d => {
             return(
-              <ItemCard key={d.uri} itemName={d.name} uri={d.uri} handleShow={this.props.handleShow}/>
+              <ItemCard key={d.uri} data={d} handleShow={this.props.handleShow}/>
             )
           })
         }

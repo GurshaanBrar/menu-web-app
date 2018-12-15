@@ -86,7 +86,7 @@ class ItemsPreview extends Component {
                     <p style={{paddingTop:'4%'}}>
                         <Row>           
                             <Col md={12}>
-                                %description%
+                                {this.props.itemInView.description}
                             </Col>
                         </Row>
                     </p>
@@ -105,7 +105,7 @@ class ItemsPreview extends Component {
                     <p style={{paddingTop:'4%'}}>
                         <Row>           
                             <Col md={12}>
-                                %price%
+                                $ {this.props.itemInView.price}
                             </Col>
                         </Row>
                     </p>
@@ -124,7 +124,9 @@ class ItemsPreview extends Component {
                     <p style={{paddingTop:'4%'}}>
                         <Row>           
                             <Col md={12}>
-                                %uri%
+                                <a style={{overflowWrap: 'break-word'}} href={this.props.itemInView.uri}>
+                                    {this.props.itemInView.uri}
+                                </a>
                             </Col>
                         </Row>
                     </p>
@@ -143,7 +145,7 @@ class ItemsPreview extends Component {
                     <p style={{paddingTop:'4%'}}>
                         <Row>           
                             <Col md={12}>
-                                Breakfast Menu - Mains
+                                Some Menu - {this.props.itemInView.category}                                
                             </Col>
                         </Row>
                     </p>

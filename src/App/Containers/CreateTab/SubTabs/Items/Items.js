@@ -1,20 +1,30 @@
 import React, { Component } from 'react';
 import { Row, Col} from 'react-bootstrap';
+import { inject, observer } from "mobx-react";
 import SearchBar from '../../../../Components/SearchBar/SearchBar';
 import ItemsPreview from '../../../../Components/ItemsPreview/ItemsPreview';
 import ItemModal from '../../../../Components/ItemModal/ItemModal';
 import "./Items.css"
 
+@inject("CreateTabStore")
+@inject("globalStore")
+@observer
 class Items extends Component {
   constructor(props) {
     super(props)
 
     this.state = {
       searchQuery: "",
-      displayItems: this.props.store.itemSubStore.items,
+      displayItems: this.props.CreateTabStore.itemSubStore.items,
       show: false
     }
-    this.store=this.props.store;
+    
+    this.store=this.props.CreateTabStore;
+    this.globalStore=this.props.globalStore;
+  }
+
+  componentDidMount() {
+    this.store.getItems(this.globalStore.placeId);
   }
 
   // updates the items in display
@@ -43,9 +53,12 @@ class Items extends Component {
   }
 
   newItemClickHandler = () => {
-    this.props.store.setItemInView({
+    this.store.setItemInView({
       name: "My New Item",
       uri: "https://livingstonbagel.com/wp-content/uploads/2016/11/food-placeholder.jpg",
+      description: "% A good description sells your food! Explain your dish and sell it %",
+      price: "% predicted item price range: $ 10 - $ 14 %",
+      
     })
 
     this.handleShow() 

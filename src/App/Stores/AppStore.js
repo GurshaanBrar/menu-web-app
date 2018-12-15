@@ -11,6 +11,7 @@ export class AppStore {
   @observable sideMenuOpen = true;
   @observable sideMenuVisible = true;
   @observable activeTab = "";
+  @observable placeId = "2l2WLstfnWfsYlGEJHdc"
 
   /* #~#~#~#~#~#~ ACTIONS #~#~#~#~#~#~# */
   @action

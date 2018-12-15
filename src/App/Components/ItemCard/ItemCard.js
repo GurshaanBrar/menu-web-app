@@ -29,10 +29,7 @@ class ItemCard extends React.Component {
   }
 
   _clickHandler = () => {
-    this.store.setItemInView({
-      name: this.props.itemName,
-      uri: this.props.uri,
-    })
+    this.store.setItemInView(this.props.data)
 
     this.props.handleShow() 
   }
@@ -40,12 +37,12 @@ class ItemCard extends React.Component {
   render() {    
     return (
       <div className="item-card-cont" onClick={() => this._clickHandler()} onMouseEnter={() => this._blurImage()} onMouseLeave={() => this._unblurImage()}>
-        <Image rounded className={`item-card-image ${this.state.varClassName}`}  src={this.props.uri} alt={this.props.itemName}/>
+        <Image rounded className={`item-card-image ${this.state.varClassName}`}  src={this.props.data.uri} alt={this.props.data.name}/>
         {
           this.state.blur? //Show caption if mouse is over element
           (
             <div class="item-card-caption">
-              {this.props.itemName}
+              {this.props.data.name}
             </div>
           ):
           (null)

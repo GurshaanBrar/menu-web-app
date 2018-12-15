@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { inject, observer } from "mobx-react";
 import './App.css';
 import SideNav, { NavItem, NavIcon, NavText } from '@trendmicro/react-sidenav';
-// Be sure to include styles at some point, probably during your bootstraping
+import RequestHandler from './Services/RequestHandler';
 import '@trendmicro/react-sidenav/dist/react-sidenav.css';
 
 
@@ -35,7 +35,10 @@ class App extends Component {
     }
 
     componentDidMount() {
-        var keys = Object.keys(this.connections);
+        // initialize firebase
+        RequestHandler.initFirebase();
+
+        // var keys = Object.keys(this.connections);
         var values = Object.values(this.connections);
 
         var loc = this.props.location.pathname.split('/');

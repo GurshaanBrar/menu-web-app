@@ -42,11 +42,11 @@ class CreateTab extends Component {
       <div style={{marginLeft: tempOffset, height:"100%"}}>
       {
         this.state.loc === 'photos'?
-        (<Photos store={this.store}/>):
+        (<Photos/>):
         this.state.loc === 'items'?
-        (<Items store={this.store}/>):
+        (<Items/>):
         this.state.loc === 'menus'?
-        (<Menus store={this.store}/>):
+        (<Menus/>):
         (null)
       }
       </div>

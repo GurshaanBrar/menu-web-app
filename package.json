@@ -8,6 +8,7 @@
     "babel-polyfill": "^6.26.0",
     "babel-preset-mobx": "^1.0.2",
     "copy-webpack-plugin": "^4.6.0",
+    "firebase": "^5.7.0",
     "lodash": "^4.17.11",
     "mobx": "^4.2.1",
     "mobx-react": "^5.1.2",
