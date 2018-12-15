@@ -1,20 +1,28 @@
 // External
 import React, { Component } from 'react';
-import { Modal, Image } from 'react-bootstrap';
+import { Modal, Image, FormControl, Button } from 'react-bootstrap';
 import { Row, Col} from 'react-bootstrap';
+import { inject, observer } from "mobx-react";
 
 const mql = window.matchMedia(`(min-width: 1000px)`);
 
+@inject("CreateTabStore")
+@inject("globalStore")
+@observer
 class ItemsPreview extends Component {
     constructor(props) {
         super(props)
 
         this.state = {
-            isWide: mql.matches // if screen is wide enough modal will have some padding
+            isWide: mql.matches, // if screen is wide enough modal will have some padding
+            editArea: "",
+            editAreaValue: ""
         }
 
         this.mediaQueryChanged = this.mediaQueryChanged.bind(this);
         this.editIcon = "fas fa-cog";
+        this.store = this.props.CreateTabStore;
+        this.globalStore = this.props.globalStore;
     }
 
     componentWillMount() {
@@ -29,15 +37,40 @@ class ItemsPreview extends Component {
         this.setState({isWide: mql.matches})
     } 
 
+    _handleClick(e, val) {
+        this.setState({editArea: e.target.innerHTML.toLowerCase(), editAreaValue: val})
+    }
+
+    handleChange(e) {
+        this.setState({ editAreaValue: e.target.value });
+    }
+
+    _handleSubmit() {
+        this.store.editItem("", `${this.props.itemInView.breadcrumb}.${this.state.editArea}`, this.state.editAreaValue);
+        
+        this.setState({editArea: "", editAreaValue: ""})
+    }
+
+    _handleCancel() {
+        this.setState({editArea: "", editAreaValue: ""})
+    }
 
     render() {
         var tempClassName = "item-preview-modal-cont-full";
+        const editor = <div>
+                        <FormControl
+                            type="text"
+                            value={this.state.editAreaValue}
+                            placeholder="Enter text"
+                            onChange={this.handleChange.bind(this)}
+                        />
+                        <Button onClick={this._handleSubmit.bind(this)}>Save</Button>
+                        <Button onClick={this._handleCancel.bind(this)}>Cancel</Button>
+                    </div>
 
         if(this.state.isWide) {
             tempClassName = "items-preview-modal-cont";
         }
-
-        console.log(tempClassName)
 
         return(
         <Modal dialogClassName={tempClassName} show={this.props.show} onHide={() => this.props.handleClose()}>
@@ -54,7 +87,7 @@ class ItemsPreview extends Component {
                     <Image style={{width: '100%', objectFit: 'cover'}} src={this.props.itemInView.uri}/>
                 </Col>
                 <Col xs={3} md={3} style={{color: "#5A626B"}}>
-                    <a className="items-preview-custom-atag">
+                    <a onClick={(e) => this._handleClick(e, this.props.itemInView.name)} className="items-preview-custom-atag">
                         <Row>
                             <Col xs={9} md={10}>
                                 Name
@@ -64,16 +97,20 @@ class ItemsPreview extends Component {
                             </Col>
                         </Row>
                     </a>
-                    <p style={{paddingTop:'4%'}}>
+                    <div style={{paddingTop:'4%'}}>
                         <Row>
                             <Col md={12}>
-                                {this.props.itemInView.name}
+                                {
+                                    this.state.editArea === "name"?
+                                    (editor):
+                                    (this.props.itemInView.name)
+                                }
                             </Col>
                         </Row>
-                    </p>
+                    </div>
                     <hr/>
 
-                    <a className="items-preview-custom-atag">
+                    <a onClick={(e) => this._handleClick(e, this.props.itemInView.description)} className="items-preview-custom-atag">
                         <Row>
                             <Col xs={9} md={10}>
                                 Description
@@ -83,16 +120,20 @@ class ItemsPreview extends Component {
                             </Col>
                         </Row>
                     </a>
-                    <p style={{paddingTop:'4%'}}>
+                    <div style={{paddingTop:'4%'}}>
                         <Row>           
                             <Col md={12}>
-                                {this.props.itemInView.description}
+                                {
+                                    this.state.editArea === "description"?
+                                    (editor):
+                                    (this.props.itemInView.description)
+                                }
                             </Col>
                         </Row>
-                    </p>
+                    </div>
                     <hr/>
 
-                    <a className="items-preview-custom-atag">
+                    <a onClick={(e) => this._handleClick(e)} className="items-preview-custom-atag">
                         <Row>
                             <Col xs={9} md={10}>
                                 Price
@@ -102,16 +143,16 @@ class ItemsPreview extends Component {
                             </Col>
                         </Row>
                     </a>
-                    <p style={{paddingTop:'4%'}}>
+                    <div style={{paddingTop:'4%'}}>
                         <Row>           
                             <Col md={12}>
                                 $ {this.props.itemInView.price}
                             </Col>
                         </Row>
-                    </p>
+                    </div>
                     <hr/>
 
-                    <a className="items-preview-custom-atag">
+                    <a onClick={(e) => this._handleClick(e)} className="items-preview-custom-atag">
                         <Row>
                             <Col xs={9} md={10}>
                                 Image URL
@@ -121,7 +162,7 @@ class ItemsPreview extends Component {
                             </Col>
                         </Row>
                     </a>
-                    <p style={{paddingTop:'4%'}}>
+                    <div style={{paddingTop:'4%'}}>
                         <Row>           
                             <Col md={12}>
                                 <a style={{overflowWrap: 'break-word'}} href={this.props.itemInView.uri}>
@@ -129,10 +170,10 @@ class ItemsPreview extends Component {
                                 </a>
                             </Col>
                         </Row>
-                    </p>
+                    </div>
                     <hr/>
 
-                    <a className="items-preview-custom-atag">
+                    <a onClick={(e) => this._handleClick(e)} className="items-preview-custom-atag">
                         <Row>
                             <Col xs={9} md={10}>
                                 Menus
@@ -142,13 +183,13 @@ class ItemsPreview extends Component {
                             </Col>
                         </Row>
                     </a>
-                    <p style={{paddingTop:'4%'}}>
+                    <div style={{paddingTop:'4%'}}>
                         <Row>           
                             <Col md={12}>
                                 Some Menu - {this.props.itemInView.category}                                
                             </Col>
                         </Row>
-                    </p>
+                    </div>
                     <hr/>
                 </Col>
             </Row>

@@ -43,8 +43,6 @@ class Items extends Component {
   }
 
   handleClose() {
-    console.log('closing');
-    
     this.setState({ show: false });
   }
 
@@ -58,7 +56,6 @@ class Items extends Component {
       uri: "https://livingstonbagel.com/wp-content/uploads/2016/11/food-placeholder.jpg",
       description: "% A good description sells your food! Explain your dish and sell it %",
       price: "% predicted item price range: $ 10 - $ 14 %",
-      
     })
 
     this.handleShow() 

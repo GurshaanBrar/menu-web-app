@@ -6,12 +6,7 @@ export default class RequestHandler {
     static initFirebase() {
         // Initialize Firebase
         var config = {
-            apiKey: "AIzaSyA05wLZQbEq5QDWPvIGfTAFX0uTf-9zj8I",
-            authDomain: "reactive-solutions-menu-app.firebaseapp.com",
-            databaseURL: "https://reactive-solutions-menu-app.firebaseio.com",
-            projectId: "reactive-solutions-menu-app",
-            storageBucket: "reactive-solutions-menu-app.appspot.com",
-            messagingSenderId: "83679593588"
+
         };
         firebase.initializeApp(config);
 
@@ -32,6 +27,17 @@ export default class RequestHandler {
     static setDocument(col: string, doc: string, body: Object) {    
         return(
             this.fs.collection(col).doc(doc).set(body)
+        )
+    }
+
+    // @Def: Updates key with new value
+    // @Param: col = target collection
+    //         doc = target document
+    //         body = contains key value pair to change
+    // @Post: returns promise
+    static updateDocument(col: string, doc: string, body: Object) {    
+        return(
+            this.fs.collection(col).doc(doc).update(body)
         )
     }
 

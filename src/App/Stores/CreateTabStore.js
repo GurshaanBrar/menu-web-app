@@ -15,23 +15,29 @@ export class CreateTabStore {
     getItems(placeId) {
       RequestHandler.getDocument("Menus", placeId)
       .then(action("success", res => {
-
+        console.log(res.data());
+        
         if(res.exists) {
-          let menu = res.data().menu
+          // map data() to local var 
+          let data = res.data() 
 
-          for(let cat of menu) {
-            // store category info
-            let catName = cat.type_header;
+          // itr menus
+          for(let menu in data) {
+            // itr categories in menu
+            for(let cat in data[`${menu}`]) {
+              // itr items in menu category
+              for(let item in data[`${menu}`][`${cat}`]) {
 
-            // itr items in category
-            for(let item of cat.items) {
-              let tempObj = {category: catName};
-              let retObj = { ...tempObj, ...item}
+                // format response
+                let itemData = data[`${menu}`][`${cat}`][`${item}`];                
+                let tempObj = {category: cat, breadcrumb: `${menu}.${cat}.${item}`};
+                let retObj = { ...tempObj, ...itemData}
 
-              // add item to local data
-              this.itemSubStore.items.push(retObj)
+                // add item to local data
+                this.itemSubStore.items.push(retObj)
+              }
             }
-          }        
+          } 
         }
         else {
           console.log("menu does not exist")
@@ -41,11 +47,27 @@ export class CreateTabStore {
         console.log(err);   
       })
     }
+
+    @action
+    clearItems(placeId) {
+      this.itemSubStore.items = [];
+    }
+
     // Changes the item which will appear in modal
     @action
     setItemInView(newItem) {     
+      console.log(newItem)
       this.itemSubStore.itemInView = newItem;
     }
+
+    @action
+    editItem(placeId, path, newVal) {
+      let tempObj = {};
+      tempObj[path] = newVal
+      RequestHandler.updateDocument("Menus", "2l2WLstfnWfsYlGEJHdc", tempObj)
+    }
+
+
   }
   export default new CreateTabStore()
   
@@ -100,3 +122,41 @@ export class CreateTabStore {
       name: "Cactus Club House Burger"
     }
   ]
+
+
+  const backup = {
+    "Food Menu": {
+      "BURGERS + SANDWICHES": {
+        "ce8af52e-002e-11e9-8eb2-f2801f1b9fd1": {
+          "description": "created by chef rob feenie. peking duck, roasted chicken, prosciutto di modena, pecan fruit bread",
+          "name": "BBQ Duck Clubhouse",
+          "price": 19,
+          "uri": "https://i.pinimg.com/originals/ad/84/3b/ad843bde6e58f12e2a1dfe0af32569ab.jpg",
+          "views": 10
+        },
+        "ce8af7e0-002e-11e9-8eb2-f2801f1b9fd1": {
+          "description": "smashed certified angus beef®, sautéed mushrooms, aged cheddar, smoked bacon, red relish, mayonnaise, ketchup, mustard",
+          "name": "The Feenie Burger",
+          "price": 19,
+          "uri": "https://noshandnibble.blog/content/images/2018/04/cactus-club-cafe-feenie-burger.jpg",
+          "views": 2
+        }
+      },
+      "DESSERTS": {
+        "ce8af934-002e-11e9-8eb2-f2801f1b9fd1": {
+          "description": "tahitian vanilla ice cream, caramel sauce, crunchy chocolate pearls",
+          "name": "Chocolate Peanut Butter Crunch Bar",
+          "price": 9.75,
+          "uri": "https://s3.amazonaws.com/cdn.houseandhome.com/wp-content/uploads/Cake_CactusClubCafe_HH_AU11_0.jpg",
+          "views": 22
+        },
+        "ce8afa7e-002e-11e9-8eb2-f2801f1b9fd1": {
+          "description": "warm caramel foam, crunchy sponge toffee, velvety chocolate mousse",
+          "name": "Caramel Chocolate Mousse",
+          "price": 6.5,
+          "uri": "https://thisbeautifuldayblog.com/wp-content/uploads/2015/10/Cactus-club-cafe-Toronto-Dessert-e1446056953433.jpg",
+          "views": 5
+        }
+      }
+    }
+  }
