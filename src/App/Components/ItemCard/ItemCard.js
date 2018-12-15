@@ -39,8 +39,8 @@ class ItemCard extends React.Component {
 
   render() {    
     return (
-      <div className="item-card-cont" rounded onClick={() => this._clickHandler()} onMouseEnter={() => this._blurImage()} onMouseLeave={() => this._unblurImage()}>
-        <Image className={`item-card-image ${this.state.varClassName}`}  src={this.props.uri} alt={this.props.itemName}/>
+      <div className="item-card-cont" onClick={() => this._clickHandler()} onMouseEnter={() => this._blurImage()} onMouseLeave={() => this._unblurImage()}>
+        <Image rounded className={`item-card-image ${this.state.varClassName}`}  src={this.props.uri} alt={this.props.itemName}/>
         {
           this.state.blur? //Show caption if mouse is over element
           (

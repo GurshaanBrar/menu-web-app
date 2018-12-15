@@ -3,7 +3,7 @@ import { inject, observer } from "mobx-react";
 import './CreateTab.css';
 import Photos from './SubTabs/Photos'
 import Items from './SubTabs/Items/Items';
-import Menus from './SubTabs/Menus';
+import Menus from './SubTabs/Menus/Menus';
 
 @inject('globalStore')
 @inject('CreateTabStore')
