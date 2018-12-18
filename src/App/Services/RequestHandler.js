@@ -6,7 +6,12 @@ export default class RequestHandler {
     static initFirebase() {
         // Initialize Firebase
         var config = {
-
+            apiKey: "AIzaSyA05wLZQbEq5QDWPvIGfTAFX0uTf-9zj8I",
+            authDomain: "reactive-solutions-menu-app.firebaseapp.com",
+            databaseURL: "https://reactive-solutions-menu-app.firebaseio.com",
+            projectId: "reactive-solutions-menu-app",
+            storageBucket: "reactive-solutions-menu-app.appspot.com",
+            messagingSenderId: "83679593588"
         };
         firebase.initializeApp(config);
 

@@ -27,14 +27,15 @@ export class CreateTabStore {
             for(let cat in data[`${menu}`]) {
               // itr items in menu category
               for(let item in data[`${menu}`][`${cat}`]) {
+                if(item !== "type_description") {
+                  // format response
+                  let itemData = data[`${menu}`][`${cat}`][`${item}`];                
+                  let tempObj = {category: cat, breadcrumb: `${menu}.${cat}.${item}`};
+                  let retObj = { ...tempObj, ...itemData}
 
-                // format response
-                let itemData = data[`${menu}`][`${cat}`][`${item}`];                
-                let tempObj = {category: cat, breadcrumb: `${menu}.${cat}.${item}`};
-                let retObj = { ...tempObj, ...itemData}
-
-                // add item to local data
-                this.itemSubStore.items.push(retObj)
+                  // add item to local data
+                  this.itemSubStore.items.push(retObj)
+                }
               }
             }
           } 
