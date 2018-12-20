@@ -25,6 +25,7 @@ class Items extends Component {
 
   componentDidMount() {
     this.store.getItems(this.globalStore.placeId);
+    this.store.setListener();
   }
 
   // updates the items in display

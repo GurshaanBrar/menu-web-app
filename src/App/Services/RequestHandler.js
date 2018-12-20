@@ -16,6 +16,12 @@ export default class RequestHandler {
         // Some nonsense...
         this.fs.settings({ timestampsInSnapshots: true });
     }
+
+    static listenToDoc() {
+        return(
+            this.fs.collection("Menus").doc("2l2WLstfnWfsYlGEJHdc")
+        )
+    }
     
     // @Def: sets document with body, if doc dne then it will create it
     // @Param: col = target collection (string)

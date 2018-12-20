@@ -46,7 +46,7 @@ class ItemsPreview extends Component {
     }
 
     _handleSubmit() {
-        this.store.editItem("", `${this.props.itemInView.breadcrumb}.${this.state.editArea}`, this.state.editAreaValue);
+        this.store.editItem("2l2WLstfnWfsYlGEJHdc", `${this.props.itemInView.breadcrumb}.${this.state.editArea}`, this.state.editAreaValue);
         
         this.setState({editArea: "", editAreaValue: ""})
     }

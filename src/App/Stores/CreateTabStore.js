@@ -57,7 +57,6 @@ export class CreateTabStore {
     // Changes the item which will appear in modal
     @action
     setItemInView(newItem) {     
-      console.log(newItem)
       this.itemSubStore.itemInView = newItem;
     }
 
@@ -65,7 +64,21 @@ export class CreateTabStore {
     editItem(placeId, path, newVal) {
       let tempObj = {};
       tempObj[path] = newVal
-      RequestHandler.updateDocument("Menus", "2l2WLstfnWfsYlGEJHdc", tempObj)
+      RequestHandler.updateDocument("Menus", placeId, tempObj)
+      .then(res => {
+        console.log('updated');
+        console.log(res);
+      })
+    }
+
+    @action
+    setListener(col, placeId) {
+      RequestHandler.listenToDoc()
+      .onSnapshot({
+        includeMetadataChanges: true
+      }, (doc) => {
+        console.log(doc.data()); 
+      });
     }
 
 

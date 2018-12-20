@@ -15,7 +15,7 @@
 
 .items-preview-custom-atag {
 	color: var(--dark_primary);
-	font-weight: bold
+	font-weight: bold; 
 }
 
 .items-preview-custom-atag:hover {
