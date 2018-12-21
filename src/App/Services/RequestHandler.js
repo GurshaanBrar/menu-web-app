@@ -17,9 +17,9 @@ export default class RequestHandler {
         this.fs.settings({ timestampsInSnapshots: true });
     }
 
-    static listenToDoc() {
+    static listenToDoc(col, doc) {
         return(
-            this.fs.collection("Menus").doc("2l2WLstfnWfsYlGEJHdc")
+            this.fs.collection(col).doc(doc)
         )
     }
     

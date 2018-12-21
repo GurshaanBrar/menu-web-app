@@ -24,8 +24,8 @@ class Items extends Component {
   }
 
   componentDidMount() {
-    this.store.getItems(this.globalStore.placeId);
-    this.store.setListener();
+    this.store.getItems(this.globalStore.placeId);  // Initial Data Fetch
+    this.store.setListener(this.globalStore.placeId); // Setup listener on Menus doc
   }
 
   // updates the items in display

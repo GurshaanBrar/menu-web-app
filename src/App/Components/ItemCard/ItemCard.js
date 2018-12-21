@@ -17,7 +17,7 @@ class ItemCard extends React.Component {
       show: false
     }
 
-    this.store = this.props.CreateTabStore;
+    this.store = this.props.CreateTabStore;    
   }
 
   _blurImage = () => {
@@ -29,7 +29,10 @@ class ItemCard extends React.Component {
   }
 
   _clickHandler = () => {
-    this.store.setItemInView(this.props.data)
+    // add index so we can change local copy
+    var tempObj = this.props.data;
+    tempObj["index"] = this.props.count;
+    this.store.setItemInView(this.props.data);
 
     this.props.handleShow() 
   }

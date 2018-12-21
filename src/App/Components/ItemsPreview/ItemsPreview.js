@@ -23,9 +23,9 @@ class ItemsPreview extends Component {
       return(
         <div className="item-preview-cont">
         {
-          this.props.listOfItems.map(d => {
+          this.props.listOfItems.map((d, count) => {
             return(
-              <ItemCard key={d.uri} data={d} handleShow={this.props.handleShow}/>
+              <ItemCard key={d.uri} data={d} count={count} handleShow={this.props.handleShow}/>
             )
           })
         }
