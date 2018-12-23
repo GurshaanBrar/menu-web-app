@@ -1,4 +1,4 @@
-import { observable, action } from "mobx"
+import { observable, action, toJS } from "mobx"
 import RequestHandler from '../Services/RequestHandler';
 
 export class CreateTabStore {
@@ -6,25 +6,35 @@ export class CreateTabStore {
     @observable itemSubStore = {
       items: [], //All items
       itemInView: "",
-    }
+    };
+    @observable menuSubStore = {
+      loading:true,
+      menuCats: [],
+      itemInView: "",
+    };
 
     /* #~#~#~#~#~#~ ACTIONS #~#~#~#~#~#~# */
 
     // Grabs all items from place menu
     @action
-    getItems(placeId) {
+    getItems(placeId, withMenus=false) {
       RequestHandler.getDocument("Menus", placeId)
-      .then(action("success", res => {
-        console.log(res.data());
-        
+      .then(action("success", res => {        
         if(res.exists) {
           // map data() to local var 
           let data = res.data() 
 
           // itr menus
-          for(let menu in data) {
+          for(let menu in data) {            
+            let count = 0;
             // itr categories in menu
             for(let cat in data[`${menu}`]) {
+              let tempLane = {
+                id: cat,
+                title: cat,
+                cards: []
+              }
+              
               // itr items in menu category
               for(let item in data[`${menu}`][`${cat}`]) {
                 if(item !== "type_description") {
@@ -34,11 +44,25 @@ export class CreateTabStore {
                   let retObj = { ...tempObj, ...itemData}
 
                   // add item to local data
-                  this.itemSubStore.items.push(retObj)
+                  if(withMenus) {
+                    retObj['id'] = item;
+                    tempLane.cards.push(retObj)
+                  }
+                  else {
+                    this.itemSubStore.items.push(retObj)
+                  }
                 }
               }
+
+              if(withMenus) {
+                this.menuSubStore.menuCats.push(tempLane)
+              }
+              count++;
             }
-          } 
+          }
+          this.menuSubStore.loading = false;
+          this.updateMenuCats()
+          
         }
         else {
           console.log("menu does not exist")
@@ -50,14 +74,15 @@ export class CreateTabStore {
     }
 
     @action
-    clearItems(placeId) {
-      this.itemSubStore.items = [];
+    updateMenuCats() {
+      for(let item of toJS(this.itemSubStore.items)) {
+        console.log(item);
+      }      
     }
 
-    // Changes the item which will appear in modal
     @action
-    setItemInView(newItem) {     
-      this.itemSubStore.itemInView = newItem;
+    clearItems() {
+      this.itemSubStore.items = [];
     }
 
     // Sets items with new values
@@ -71,6 +96,19 @@ export class CreateTabStore {
       })
     }
 
+    // Changes the item which will appear in modal
+    @action
+    setItemInView(newItem, subStore) {     
+      if(subStore === 'item') {
+        this.itemSubStore.itemInView = newItem;
+      }
+      else if (subStore === 'menu') {
+        console.log(newItem);
+        
+        this.menuSubStore.itemInView = newItem;
+      }
+    }
+
     // This creates the listener for the menus doc,
     // If the document changes, the local values will be updated to mach the db
     @action
@@ -79,6 +117,8 @@ export class CreateTabStore {
       .onSnapshot({
         includeMetadataChanges: true
       }, action("success", (doc) => {
+
+        // Update local observable itemSubStore.itemInView
         if (this.itemSubStore.itemInView !== "") {
           // copy breadcrumb key/value to new obj
           const breadcrumb = {"breadcrumb": this.itemSubStore.itemInView.breadcrumb};
@@ -88,9 +128,22 @@ export class CreateTabStore {
           this.itemSubStore.items[this.itemSubStore.itemInView.index] =  { ...doc.data()[crumbs[0]][crumbs[1]][crumbs[2]] , ...breadcrumb};      
           this.itemSubStore.itemInView = { ...doc.data()[crumbs[0]][crumbs[1]][crumbs[2]] , ...breadcrumb};
         }
+
+        // Update local observable menuSubStore.itemInView
+        if (this.menuSubStore.itemInView !== "") {
+          console.log(this.menuSubStore.menuCats["DESSERTS"]);
+          
+
+          // copy breadcrumb key/value to new obj
+          const breadcrumb = {"breadcrumb": this.menuSubStore.itemInView.breadcrumb};
+          var crumbs = this.menuSubStore.itemInView.breadcrumb.split('.'); //Split into traceable obj keys
+          
+          // // Set local to new values
+          // this.itemSubStore.items[this.itemSubStore.itemInView.index] =  { ...doc.data()[crumbs[0]][crumbs[1]][crumbs[2]] , ...breadcrumb};      
+          // this.itemSubStore.itemInView = { ...doc.data()[crumbs[0]][crumbs[1]][crumbs[2]] , ...breadcrumb};
+        }
       }));
     }
-
 
   }
   export default new CreateTabStore()
