@@ -28,8 +28,8 @@ export class CreateTabStore {
           for(let menu in data) {            
             let count = 0;
             // itr categories in menu
-            for(let cat in data[`${menu}`]) {
-              let tempLane = {
+            for(var cat in data[`${menu}`]) {
+              var tempLane = {
                 id: cat,
                 title: cat,
                 cards: []
@@ -54,14 +54,15 @@ export class CreateTabStore {
                 }
               }
 
-              if(withMenus) {
+              if(withMenus) { 
+                console.log(tempLane);
+                
                 this.menuSubStore.menuCats.push(tempLane)
               }
               count++;
             }
           }
           this.menuSubStore.loading = false;
-          this.updateMenuCats()
           
         }
         else {
@@ -71,13 +72,6 @@ export class CreateTabStore {
       .catch(err => {
         console.log(err);   
       })
-    }
-
-    @action
-    updateMenuCats() {
-      for(let item of toJS(this.itemSubStore.items)) {
-        console.log(item);
-      }      
     }
 
     @action
@@ -130,18 +124,21 @@ export class CreateTabStore {
         }
 
         // Update local observable menuSubStore.itemInView
-        if (this.menuSubStore.itemInView !== "") {
-          console.log(this.menuSubStore.menuCats["DESSERTS"]);
+        // if (this.menuSubStore.itemInView !== "") {
+        //   var itemMap = this.menuSubStore.itemInView;
+        //   console.log(this.menuSubStore.menuCats);
+          
+        //   console.log(this.menuSubStore.menuCats.find( x => x.title = "DESSERTS" ));
           
 
-          // copy breadcrumb key/value to new obj
-          const breadcrumb = {"breadcrumb": this.menuSubStore.itemInView.breadcrumb};
-          var crumbs = this.menuSubStore.itemInView.breadcrumb.split('.'); //Split into traceable obj keys
+        //   // copy breadcrumb key/value to new obj
+        //   const breadcrumb = {"breadcrumb": this.menuSubStore.itemInView.breadcrumb};
+        //   var crumbs = this.menuSubStore.itemInView.breadcrumb.split('.'); //Split into traceable obj keys
           
           // // Set local to new values
           // this.itemSubStore.items[this.itemSubStore.itemInView.index] =  { ...doc.data()[crumbs[0]][crumbs[1]][crumbs[2]] , ...breadcrumb};      
           // this.itemSubStore.itemInView = { ...doc.data()[crumbs[0]][crumbs[1]][crumbs[2]] , ...breadcrumb};
-        }
+        // }
       }));
     }
 

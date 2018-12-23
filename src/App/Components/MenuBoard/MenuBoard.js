@@ -10,9 +10,11 @@ export default class MenuBoard extends Component {
   constructor(props) {
     super(props);
 
+    var mapCats = this.props.CreateTabStore.menuSubStore.menuCats;
+
     this.state={
       data: {
-        lanes: toJS(this.props.CreateTabStore.menuSubStore.menuCats)
+        lanes: toJS(mapCats)
       }
     }
   }
@@ -53,7 +55,7 @@ class CustomCard extends Component {
     }
     this.store.setItemInView(tempObj, "menu");
 
-    this.props.handleShow()
+    this.props.handleShow();
   }
 
   render() {

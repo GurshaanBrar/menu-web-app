@@ -22,7 +22,6 @@ class Menus extends Component {
   }
 
   componentDidMount() {
-    // this.store.getItems(this.globalStore.placeId);  // Initial Data Fetch
     this.store.getItems(this.globalStore.placeId, true);  // Initial Data Fetch
   }
 
