@@ -32,7 +32,7 @@ class ItemCard extends React.Component {
     // add index so we can change local copy
     var tempObj = this.props.data;
     tempObj["index"] = this.props.count;
-    this.store.setItemInView(this.props.data);
+    this.store.setItemInView(this.props.data, "item");
 
     this.props.handleShow() 
   }

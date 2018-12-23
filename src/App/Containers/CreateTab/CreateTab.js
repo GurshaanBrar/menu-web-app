@@ -20,9 +20,15 @@ class CreateTab extends Component {
     this.store = this.props.CreateTabStore;
   }
 
+  componentDidMount() {
+    console.log("listening");
+    
+    this.store.setListener(this.globalStore.placeId); // Setup listener on Menus doc
+  }
+
   componentWillReceiveProps(newProps) {
     // update location state
-    this.setState({loc: newProps.location.pathname.split("/").pop()})
+    this.setState({loc: newProps.location.pathname.split("/").pop()});
   }
 
   render() {
