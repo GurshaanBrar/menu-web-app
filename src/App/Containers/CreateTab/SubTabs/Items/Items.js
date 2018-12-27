@@ -15,7 +15,7 @@ class Items extends Component {
 
     this.state = {
       searchQuery: "",
-      displayItems: this.props.CreateTabStore.itemSubStore.items,
+      displayItems: this.props.CreateTabStore.items,
       show: false
     }
     
@@ -23,13 +23,9 @@ class Items extends Component {
     this.globalStore=this.props.globalStore;
   }
 
-  componentDidMount() {
-    this.store.getItems(this.globalStore.placeId);  // Initial Data Fetch
-  }
-
   // updates the items in display
   _handleSearch(query) {
-    var list = this.store.itemSubStore.items;
+    var list = this.store.items;
     var tempArr = [];
 
     // checks if i.name includes the query

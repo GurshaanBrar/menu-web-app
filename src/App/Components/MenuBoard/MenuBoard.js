@@ -38,7 +38,7 @@ class CustomCard extends Component {
   constructor(props) {
     super(props);
 
-    this.store = this.props.CreateTabStore;
+    this.store = this.props.CreateTabStore;        
   }
 
   _handleClick() {
@@ -50,7 +50,9 @@ class CustomCard extends Component {
       name: this.props.name,
       price: this.props.price, 
       uri: this.props.uri,
-      views: this.props.uri
+      views: this.props.uri,
+      index: this.props.index,
+      menu: this.props.menu
     }
     this.store.setItemInView(tempObj, "menu");
 

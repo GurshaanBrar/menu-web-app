@@ -49,7 +49,6 @@ class ItemsPreview extends Component {
 
     // triggered when save button is pressed
     _handleSubmit() {
-
         this.store.editItem(this.globalStore.placeId, `${this.props.itemInView.breadcrumb}.${this.state.editArea}`, this.state.editAreaValue);
         this.setState({editArea: "", editAreaValue: ""})
     }
