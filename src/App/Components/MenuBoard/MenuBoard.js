@@ -9,19 +9,18 @@ import { toJS } from 'mobx'
 export default class MenuBoard extends Component {
   constructor(props) {
     super(props);
-
-    var mapCats = this.props.CreateTabStore.menuSubStore.menuCats;
-
-    this.state={
-      data: {
-        lanes: toJS(mapCats)
-      }
-    }
   }
 
   render() {
+    // This code must be in render to enable realtime updates to data
+    var mapCats = this.props.CreateTabStore.menuSubStore.menuCats;
+
+    const data = {
+      lanes: toJS(mapCats)
+    }
+    
     return ( 
-        <Board data={this.state.data} 
+        <Board data={data} 
             customCardLayout 
             draggable
             style={{"backgroundColor": "inherit"}}

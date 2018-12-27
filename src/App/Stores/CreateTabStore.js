@@ -26,7 +26,6 @@ export class CreateTabStore {
 
           // itr menus
           for(let menu in data) {            
-            let count = 0;
             // itr categories in menu
             for(var cat in data[`${menu}`]) {
               var tempLane = {
@@ -54,12 +53,9 @@ export class CreateTabStore {
                 }
               }
 
-              if(withMenus) { 
-                console.log(tempLane);
-                
+              if(withMenus) {                 
                 this.menuSubStore.menuCats.push(tempLane)
               }
-              count++;
             }
           }
           this.menuSubStore.loading = false;
@@ -112,11 +108,14 @@ export class CreateTabStore {
         includeMetadataChanges: true
       }, action("success", (doc) => {
 
+        console.log('has been changed');
+        
         // Update local observable itemSubStore.itemInView
         if (this.itemSubStore.itemInView !== "") {
+          
           // copy breadcrumb key/value to new obj
           const breadcrumb = {"breadcrumb": this.itemSubStore.itemInView.breadcrumb};
-          var crumbs = this.itemSubStore.itemInView.breadcrumb.split('.'); //Split into traceable obj keys
+          let crumbs = this.itemSubStore.itemInView.breadcrumb.split('.'); //Split into traceable obj keys
 
           // Set local to new values
           this.itemSubStore.items[this.itemSubStore.itemInView.index] =  { ...doc.data()[crumbs[0]][crumbs[1]][crumbs[2]] , ...breadcrumb};      
@@ -124,25 +123,50 @@ export class CreateTabStore {
         }
 
         // Update local observable menuSubStore.itemInView
-        // if (this.menuSubStore.itemInView !== "") {
-        //   var itemMap = this.menuSubStore.itemInView;
-        //   console.log(this.menuSubStore.menuCats);
+        if (this.menuSubStore.itemInView !== "") {
+          var itemMap = this.menuSubStore.itemInView;
+          var menuCatsArr = toJS(this.menuSubStore.menuCats);
           
-        //   console.log(this.menuSubStore.menuCats.find( x => x.title = "DESSERTS" ));
-          
+          // copy breadcrumb key/value to new obj
+          const breadcrumb = {"breadcrumb": this.menuSubStore.itemInView.breadcrumb};
+          let crumbs = this.menuSubStore.itemInView.breadcrumb.split('.'); //Split into traceable obj keys
 
-        //   // copy breadcrumb key/value to new obj
-        //   const breadcrumb = {"breadcrumb": this.menuSubStore.itemInView.breadcrumb};
-        //   var crumbs = this.menuSubStore.itemInView.breadcrumb.split('.'); //Split into traceable obj keys
+          // search for the changed object in local store and record the index of itemInView
+          let el0 = -1; //first index
+          let el1 = -1; // second index
+          var catCount = 0;
+
+          for(let cat of menuCatsArr) { // iterate categories
+            var cardCount = 0;
+
+            if(cat.title === itemMap.category) {
+              el0 = catCount;
+
+              for(let card of cat.cards) { // iterate cards
+                if(card.id === itemMap.id) {
+                  el1 = cardCount;
+                  
+                }
+                cardCount++;
+              }
+            }
+            catCount++;
+          }
           
-          // // Set local to new values
-          // this.itemSubStore.items[this.itemSubStore.itemInView.index] =  { ...doc.data()[crumbs[0]][crumbs[1]][crumbs[2]] , ...breadcrumb};      
-          // this.itemSubStore.itemInView = { ...doc.data()[crumbs[0]][crumbs[1]][crumbs[2]] , ...breadcrumb};
-        // }
+          // update local copies with db obj if index of found elements is valid
+          if(el0 !== -1 && el1 !== -1) {
+
+            console.log(this.menuSubStore.menuCats[`${el0}`].cards[`${el1}`]);
+            console.log(toJS(doc.data()[crumbs[0]][crumbs[1]][crumbs[2]]));
+            this.menuSubStore.itemInView = { ...doc.data()[crumbs[0]][crumbs[1]][crumbs[2]] , ...breadcrumb};
+            this.menuSubStore.menuCats[`${el0}`].cards[`${el1}`] =  { ...doc.data()[crumbs[0]][crumbs[1]][crumbs[2]] , ...breadcrumb};  
+          }  
+        }
       }));
     }
 
   }
+
   export default new CreateTabStore()
   
 
