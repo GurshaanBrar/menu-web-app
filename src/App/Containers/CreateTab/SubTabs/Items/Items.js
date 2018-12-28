@@ -21,6 +21,9 @@ class Items extends Component {
     
     this.store=this.props.CreateTabStore;
     this.globalStore=this.props.globalStore;
+
+    // sets the menu categories... useful in items modal when selecting new categories
+    this.store.setMenuCategories();   
   }
 
   // updates the items in display
@@ -47,6 +50,8 @@ class Items extends Component {
   }
 
   newItemClickHandler = () => {
+
+
     this.store.setItemInView({
       name: "My New Item",
       uri: "https://livingstonbagel.com/wp-content/uploads/2016/11/food-placeholder.jpg",

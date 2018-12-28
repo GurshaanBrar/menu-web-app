@@ -20,7 +20,8 @@
     "react-masonry-component": "^6.2.1",
     "react-router-dom": "^4.2.2",
     "react-scripts": "1.1.4",
-    "react-trello": "^2.0.7"
+    "react-trello": "^2.0.7",
+    "uuid": "^3.3.2"
   },
   "scripts": {
     "start": "react-app-rewired start",
