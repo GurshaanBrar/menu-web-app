@@ -5,6 +5,7 @@ import SearchBar from '../../../../Components/SearchBar/SearchBar';
 import ItemsPreview from '../../../../Components/ItemsPreview/ItemsPreview';
 import ItemModal from '../../../../Components/ItemModal/ItemModal';
 import "./Items.css"
+import NewItemModal from '../../../../Components/NewItemModal/NewItemModal';
 
 @inject("CreateTabStore")
 @inject("globalStore")
@@ -16,7 +17,8 @@ class Items extends Component {
     this.state = {
       searchQuery: "",
       displayItems: this.props.CreateTabStore.items,
-      show: false
+      show: false,
+      newShow: false
     }
     
     this.store=this.props.CreateTabStore;
@@ -46,20 +48,25 @@ class Items extends Component {
   }
 
   handleShow() {
-    this.setState({ show: true });
+    // set show to true to show modal
+    // set new show false to ensure newItem modal doesn't appear 
+    this.setState({ show: true, newShow: false });
   }
 
   newItemClickHandler = () => {
 
+    // create a new item 
+    // this.store.setItemInView({
+    //   name: "My New Item",
+    //   uri: "https://livingstonbagel.com/wp-content/uploads/2016/11/food-placeholder.jpg",
+    //   description: "% A good description sells your food! Explain your dish and sell it %",
+    //   price: "% predicted item price range: $ 10 - $ 14 %",
+    // })
 
-    this.store.setItemInView({
-      name: "My New Item",
-      uri: "https://livingstonbagel.com/wp-content/uploads/2016/11/food-placeholder.jpg",
-      description: "% A good description sells your food! Explain your dish and sell it %",
-      price: "% predicted item price range: $ 10 - $ 14 %",
-    })
-
-    this.handleShow() 
+    // this.handleShow() 
+    // set newShow to true to show modal
+    // set new show false to ensure item modal doesn't appear 
+    this.setState({show: false, newShow: true})
   }
 
   render() {
@@ -94,6 +101,12 @@ class Items extends Component {
           itemInView={this.store.itemSubStore.itemInView}
           handleClose={this.handleClose.bind(this)}
           show={this.state.show}
+        />
+
+        <NewItemModal
+          itemInView={this.store.itemSubStore.itemInView}
+          handleClose={this.handleClose.bind(this)}
+          show={this.state.newShow}
         />
       </div>
     )

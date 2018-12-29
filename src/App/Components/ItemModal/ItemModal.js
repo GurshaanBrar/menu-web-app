@@ -9,7 +9,7 @@ const mql = window.matchMedia(`(min-width: 1000px)`);
 @inject("CreateTabStore")
 @inject("globalStore")
 @observer
-class ItemsPreview extends Component {
+class ItemModal extends Component {
   constructor(props) {
     super(props);
 
@@ -117,8 +117,6 @@ class ItemsPreview extends Component {
         <Button onClick={this._handleCancel.bind(this)}>Cancel</Button>
       </div>
     );
-
-    console.log();
 
     const editor_dropdown = (
       <div>
@@ -308,4 +306,4 @@ class ItemsPreview extends Component {
   }
 }
 
-export default ItemsPreview;
+export default ItemModal;
