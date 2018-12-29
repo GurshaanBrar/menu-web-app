@@ -3,8 +3,8 @@ import React, { Component } from "react";
 import { Modal, Image, FormControl, Button } from "react-bootstrap";
 import { Row, Col } from "react-bootstrap";
 import { inject, observer } from "mobx-react";
-import { toJS } from "mobx";
 
+const uuidv1 = require("uuid/v1");
 const mql = window.matchMedia(`(min-width: 1000px)`);
 
 @inject("CreateTabStore")
@@ -20,16 +20,9 @@ class NewItemModal extends Component {
         this.globalStore = this.props.globalStore;
 
         let tempMenus = [];
-        let tempCategories = [];
 
         for (let el in this.store.menusTree) {
             tempMenus.push(el);
-        }
-
-        for (let men of tempMenus) {
-            for (let cat of this.store.menusTree[`${men}`]) {
-                tempCategories.push(cat);
-            }
         }
 
         this.state = {
@@ -41,7 +34,7 @@ class NewItemModal extends Component {
             menu: "",
             category: "",
             menusArr: tempMenus,
-            categoriesArr: tempCategories
+            categoriesArr: []
         };
     }
 
@@ -62,27 +55,77 @@ class NewItemModal extends Component {
         // this is the id to the rendered subsection which we want to change
         // used for locating correct target
         let tar = e.target.parentElement.parentElement.id;
-        let retObj = {};        
-        
+        let retObj = {};
+        let tempCategories = [];
+
+        // generate menu categories if menu has been chosen
+        if (tar === "menu") {
+            if (e.target.value === "") {
+                this.state.categoriesArr = [];
+            } else {
+                for (let cat of this.store.menusTree[`${e.target.value}`]) {
+                    tempCategories.push(cat);
+                }
+            }
+            retObj["categoriesArr"] = tempCategories;
+        }
+
         retObj[`${tar}`] = e.target.value;
         this.setState(retObj);
     }
 
     // triggered when save button is pressed
     _handleSubmit() {
-        console.log(this.state);
-        
-        let submitObj = {
-            name: this.state.name ,
-            uri: this.state.uri ,
-            description: this.state.description ,
-            price: this.state.price ,
-            menu: this.state.menu ,
-            category: this.state.category
+        let validInput = true;
+
+        // validate inputs
+        // name cannot be empty
+        if (this.state.name === "") {
+            validInput = false;
         }
-        
-        console.log(submitObj);
-        // write obj to database
+        // description is optional
+        // price must be a number
+        else if (isNaN(this.state.price)) {
+            validInput = false;
+        }
+        // must be a valid url
+        else if (
+            this.state.uri.indexOf("http://") < 0 &&
+            this.state.uri.indexOf("https://") < 0
+        ) {
+            validInput = false;
+        }
+        // menu must exist
+        else if (this.store.menus.indexOf(this.state.menu) < 0) {
+            validInput = false;
+        }
+        // menu category must exist
+        else if (this.store.menuCategories.indexOf(this.state.category) < 0) {
+            validInput = false;
+        }
+
+        if (validInput) {
+            let newItemId = uuidv1();
+            let submitObj = {
+                name: this.state.name,
+                uri: this.state.uri,
+                description: this.state.description,
+                price: Number(this.state.price),
+                views: 0
+            };
+
+            this.store.editItem(
+                this.globalStore.placeId,
+                `${this.state.menu}.${this.state.category}.${newItemId}`,
+                submitObj
+            );
+
+            this.store.clearItems();
+            this.store.getItems(this.globalStore.placeId);
+            this.props.handleClose();
+        } else {
+            console.log("err");
+        }
     }
 
     // Triggered when cancel button is pressed
@@ -143,11 +186,7 @@ class NewItemModal extends Component {
                 >
                     <option>{""}</option>
                     {editArea.map(el => {
-                        return (
-                            <option value={el}>
-                                {el}
-                            </option>
-                        );
+                        return <option value={el}>{el}</option>;
                     })}
                 </FormControl>
             </div>
@@ -281,7 +320,9 @@ class NewItemModal extends Component {
                             <div style={{ paddingTop: "4%" }}>
                                 <Row>
                                     <Col md={12} id="category">
-                                        {editor_dropdown(this.state.categoriesArr)}
+                                        {editor_dropdown(
+                                            this.state.categoriesArr
+                                        )}
                                     </Col>
                                 </Row>
                             </div>
@@ -291,7 +332,7 @@ class NewItemModal extends Component {
                                 <Button onClick={this._handleSubmit.bind(this)}>
                                     Save
                                 </Button>
-                                <Button>
+                                <Button onClick={this.props.handleClose}>
                                     Cancel
                                 </Button>
                             </div>

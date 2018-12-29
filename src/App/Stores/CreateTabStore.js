@@ -6,6 +6,7 @@ export class CreateTabStore {
   /* #~#~#~#~#~#~ OBSERVABLES #~#~#~#~#~#~# */
   @observable items = []; //All items
   @observable loading = true;
+  @observable menus = [];
   @observable menuCategories = [];
   @observable menusTree = [];
   @observable itemSubStore = {
@@ -23,6 +24,8 @@ export class CreateTabStore {
   // Grabs all items from place menu
   @action
   getItems(placeId, withMenus = false) {
+    console.log("updateting");
+    
     RequestHandler.getDocument("Menus", placeId)
       .then(
         action("success", res => {
@@ -32,6 +35,8 @@ export class CreateTabStore {
 
             // itr menus
             for (let menu in data) {
+            this.menus.push(menu)
+              
               // itr categories in menu
               for (var cat in data[`${menu}`]) {
                 // itr items in menu category
@@ -53,6 +58,8 @@ export class CreateTabStore {
               }
             }
             this.loading = false;
+            console.log(this.items);
+            
           } else {
             console.log("menu does not exist");
           }

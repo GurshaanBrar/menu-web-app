@@ -44,7 +44,7 @@ class Items extends Component {
   }
 
   handleClose() {
-    this.setState({ show: false });
+    this.setState({ show: false, newShow: false });
   }
 
   handleShow() {

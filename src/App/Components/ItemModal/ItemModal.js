@@ -47,8 +47,6 @@ class ItemModal extends Component {
 
   // Triggered when editor value changes
   handleChange(e) {
-    console.log(e.target.value);
-
     this.setState({ editAreaValue: e.target.value });
   }
 
