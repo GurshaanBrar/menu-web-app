@@ -115,7 +115,7 @@ class ItemModal extends Component {
         <Button onClick={this._handleCancel.bind(this)}>Cancel</Button>
       </div>
     );
-
+          
     const editor_dropdown = (
       <div>
         <FormControl

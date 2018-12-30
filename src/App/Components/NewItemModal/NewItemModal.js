@@ -120,8 +120,6 @@ class NewItemModal extends Component {
                 submitObj
             );
 
-            this.store.clearItems();
-            this.store.getItems(this.globalStore.placeId);
             this.props.handleClose();
         } else {
             console.log("err");

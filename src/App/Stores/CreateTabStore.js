@@ -3,263 +3,241 @@ import RequestHandler from "../Services/RequestHandler";
 import { observer } from "mobx-react";
 
 export class CreateTabStore {
-  /* #~#~#~#~#~#~ OBSERVABLES #~#~#~#~#~#~# */
-  @observable items = []; //All items
-  @observable loading = true;
-  @observable menus = [];
-  @observable menuCategories = [];
-  @observable menusTree = [];
-  @observable itemSubStore = {
-    itemInView: ""
-  };
-  @observable menuSubStore = {
-    loading: true,
-    menuCats: [],
-    itemInView: "",
-    menuInView: "Food Menu"
-  };
+    /* #~#~#~#~#~#~ OBSERVABLES #~#~#~#~#~#~# */
+    @observable items = []; //All items
+    @observable loading = true;
+    @observable menus = [];
+    @observable menuCategories = [];
+    @observable menusTree = [];
+    @observable itemSubStore = {
+        itemInView: ""
+    };
+    @observable menuSubStore = {
+        loading: true,
+        menuCats: [],
+        itemInView: "",
+        menuInView: "Food Menu"
+    };
 
-  /* #~#~#~#~#~#~ ACTIONS #~#~#~#~#~#~# */
+    /* #~#~#~#~#~#~ ACTIONS #~#~#~#~#~#~# */
 
-  // Grabs all items from place menu
-  @action
-  getItems(placeId, withMenus = false) {
-    console.log("updateting");
-    
-    RequestHandler.getDocument("Menus", placeId)
-      .then(
-        action("success", res => {
-          if (res.exists) {
-            // map data() to local var
-            let data = res.data();
+    // Grabs all items from place menu
+    @action
+    getItems(placeId, withMenus = false) {
+        RequestHandler.getDocument("Menus", placeId)
+            .then(
+                action("success", res => {
+                    if (res.exists) {
+                        // map data() to local var
+                        let data = res.data();
 
-            // itr menus
-            for (let menu in data) {
-            this.menus.push(menu)
-              
-              // itr categories in menu
-              for (var cat in data[`${menu}`]) {
-                // itr items in menu category
-                for (let item in data[`${menu}`][`${cat}`]) {
-                  if (item !== "type_description") {
-                    // format response
-                    let itemData = data[`${menu}`][`${cat}`][`${item}`];
-                    let tempObj = {
-                      id: item,
-                      menu: menu,
-                      category: cat,
-                      breadcrumb: `${menu}.${cat}.${item}`
-                    };
-                    let retObj = { ...tempObj, ...itemData };
+                        // itr menus
+                        for (let menu in data) {
+                            this.menus.push(menu);
 
-                    this.items.push(retObj);
-                  }
-                }
-              }
+                            // itr categories in menu
+                            for (var cat in data[`${menu}`]) {
+                                // itr items in menu category
+                                for (let item in data[`${menu}`][`${cat}`]) {
+                                    if (item !== "type_description") {
+                                        // format response
+                                        let itemData =
+                                            data[`${menu}`][`${cat}`][
+                                                `${item}`
+                                            ];
+                                        let tempObj = {
+                                            id: item,
+                                            menu: menu,
+                                            category: cat,
+                                            breadcrumb: `${menu}.${cat}.${item}`
+                                        };
+                                        let retObj = {
+                                            ...tempObj,
+                                            ...itemData
+                                        };
+
+                                        this.items.push(retObj);
+                                    }
+                                }
+                            }
+                        }
+                        this.loading = false;
+                        console.log(this.items);
+                    } else {
+                        console.log("menu does not exist");
+                    }
+                })
+            )
+            .catch(err => {
+                console.log(err);
+            });
+    }
+
+    // Changes the item which will appear in modal
+    @action
+    setItemInView(newItem, subStore) {
+        if (subStore === "item") {
+            this.itemSubStore.itemInView = newItem;
+        } else if (subStore === "menu") {
+            this.menuSubStore.itemInView = newItem;
+        }
+    }
+
+    @action
+    setMenuCategories() {
+        let retObj = {};
+        let knownCats = [];
+        let knownMenus = [];
+
+        console.log(toJS(this.items));
+        
+        for (let i of this.items) {
+            if (knownMenus.indexOf(i.menu) < 0) {
+                knownMenus.push(i.menu);
+                retObj[i.menu] = [];
             }
-            this.loading = false;
-            console.log(this.items);
-            
-          } else {
-            console.log("menu does not exist");
-          }
-        })
-      )
-      .catch(err => {
-        console.log(err);
-      });
-  }
-
-  // Changes the item which will appear in modal
-  @action
-  setItemInView(newItem, subStore) {
-    if (subStore === "item") {
-      this.itemSubStore.itemInView = newItem;
-    } else if (subStore === "menu") {
-      this.menuSubStore.itemInView = newItem;
-    }
-  }
-
-  @action
-  setMenuCategories() {
-    let retObj = {};
-    let knownCats = [];
-    let knownMenus = [];
-
-    for (let i of toJS(this.items)) {
-      if (knownMenus.indexOf(i.menu) < 0) {
-        knownMenus.push(i.menu);
-        retObj[i.menu] = [];
-      }
-    }
-    
-    // get list of categories
-    for (let i of toJS(this.items)) {
-      // sort only the items in menu in view assuming menu exists
-      if (knownCats.indexOf(i.category) < 0) {
-        knownCats.push(i.category);
-        retObj[i.menu].push(i.category);
-      }
-    }
-
-    console.log(retObj);
-
-    this.menuCategories = knownCats;
-    this.menusTree = retObj;
-  }
-
-  // This creates the listener for the menus doc,
-  // If the document changes, the local values will be updated to mach the db
-  @action
-  setListener(placeId) {
-    RequestHandler.listenToDoc("Menus", placeId).onSnapshot(
-      {
-        includeMetadataChanges: true
-      },
-      action("success", doc => {
-        console.log("has been changed");
-
-        // Update local observable itemSubStore.itemInView
-        if (this.itemSubStore.itemInView !== "") {
-          // copy breadcrumb key/value to new obj
-          const breadcrumb = {
-            breadcrumb: this.itemSubStore.itemInView.breadcrumb
-          };
-          // data to be passed onto new object
-          const copyData = {
-            menu: this.itemSubStore.itemInView.menu,
-            index: this.itemSubStore.itemInView.index,
-            category: this.itemSubStore.itemInView.category
-          };
-          let crumbs = this.itemSubStore.itemInView.breadcrumb.split("."); //Split into traceable obj keys
-
-          // Set local to new values if valid index aka not -1
-          if (this.itemSubStore.itemInView.index >= 0) {
-            this.items[this.itemSubStore.itemInView.index] = {
-              ...copyData,
-              ...doc.data()[crumbs[0]][crumbs[1]][crumbs[2]],
-              ...breadcrumb
-            };
-            this.itemSubStore.itemInView = {
-              ...doc.data()[crumbs[0]][crumbs[1]][crumbs[2]],
-              ...breadcrumb
-            };
-          }
         }
 
-        // update local observable menuSubStore.ItemInView
-        if (this.menuSubStore.itemInView !== "") {
-          // copy breadcrumb key/value to new obj
-          const breadcrumb = {
-            breadcrumb: this.menuSubStore.itemInView.breadcrumb
-          };
-          // data to be passed onto new object
-          const copyData = {
-            menu: this.menuSubStore.itemInView.menu,
-            index: this.menuSubStore.itemInView.index,
-            category: this.menuSubStore.itemInView.category
-          };
-          let crumbs = this.menuSubStore.itemInView.breadcrumb.split("."); //Split into traceable obj keys
-
-          // Set local to new values if valid index aka not -1
-          if (this.menuSubStore.itemInView.index >= 0) {
-            this.items[this.menuSubStore.itemInView.index] = {
-              ...copyData,
-              ...doc.data()[crumbs[0]][crumbs[1]][crumbs[2]],
-              ...breadcrumb
-            };
-            this.menuSubStore.itemInView = {
-              ...doc.data()[crumbs[0]][crumbs[1]][crumbs[2]],
-              ...breadcrumb,
-              ...copyData
-            };
-          }
+        // get list of categories
+        for (let i of toJS(this.items)) {
+            // sort only the items in menu in view assuming menu exists
+            if (knownCats.indexOf(i.category) < 0) {
+                knownCats.push(i.category);
+                retObj[i.menu].push(i.category);
+            }
         }
 
-        // Update local observable menuSubStore.itemInView
-        //     if (this.menuSubStore.itemInView !== "") {
-        //       var itemMap = this.menuSubStore.itemInView;
-        //       var menuCatsArr = toJS(this.menuSubStore.menuCats);
+        console.log(retObj);
 
-        //       // copy breadcrumb key/value to new obj
-        //       const breadcrumb = {"breadcrumb": this.menuSubStore.itemInView.breadcrumb};
-        //       let crumbs = this.menuSubStore.itemInView.breadcrumb.split('.'); //Split into traceable obj keys
-
-        //       // search for the changed object in local store and record the index of itemInView
-        //       let el0 = -1; //first index
-        //       let el1 = -1; // second index
-        //       var catCount = 0;
-
-        //       for(let cat of menuCatsArr) { // iterate categories
-        //         var cardCount = 0;
-
-        //         if(cat.title === itemMap.category) {
-        //           el0 = catCount;
-
-        //           for(let card of cat.cards) { // iterate cards
-        //             if(card.id === itemMap.id) {
-        //               el1 = cardCount;
-
-        //             }
-        //             cardCount++;
-        //           }
-        //         }
-        //         catCount++;
-        //       }
-
-        //       // update local copies with db obj if index of found elements is valid
-        //       if(el0 !== -1 && el1 !== -1) {
-
-        //         console.log(this.menuSubStore.menuCats[`${el0}`].cards[`${el1}`]);
-        //         console.log(toJS(doc.data()[crumbs[0]][crumbs[1]][crumbs[2]]));
-        //         this.menuSubStore.itemInView = { ...doc.data()[crumbs[0]][crumbs[1]][crumbs[2]] , ...breadcrumb};
-        //         this.menuSubStore.menuCats[`${el0}`].cards[`${el1}`] =  { ...doc.data()[crumbs[0]][crumbs[1]][crumbs[2]] , ...breadcrumb};
-        //       }
-        //     }
-      })
-    );
-  }
-
-  // will sort all items belonging to the menuInView into there categories
-  @action
-  sortItems() {
-    this.setMenuCategories();
-    let tempCats = [];
-    let menuName = this.menuSubStore.menuInView;
-    
-    // make new lane for each known category
-    for (let m of toJS(this.menusTree[`${menuName}`])) {
-      tempCats.push({
-        id: m,
-        title: m,
-        cards: []
-      });
+        this.menuCategories = knownCats;
+        this.menusTree = retObj;
     }
 
-    for (let i of toJS(this.items)) {
-      if (i.menu === menuName) {
-        let el0 = toJS(this.menuCategories).indexOf(i.category);
-        tempCats[`${el0}`].cards.push(i);
-      }
+    // This creates the listener for the menus doc,
+    // If the document changes, the local values will be updated to mach the db
+    @action
+    setListener(placeId) {
+        RequestHandler.listenToDoc("Menus", placeId).onSnapshot(
+            {
+                includeMetadataChanges: true
+            },
+            action("success", doc => {
+                console.log("has been changed");
+
+                // Update local observable itemSubStore.itemInView
+                if (this.itemSubStore.itemInView !== "") {
+                    // copy breadcrumb key/value to new obj
+                    const breadcrumb = {
+                        breadcrumb: this.itemSubStore.itemInView.breadcrumb
+                    };
+
+                    // data to be passed onto new object
+                    const copyData = {
+                        menu: this.itemSubStore.itemInView.menu,
+                        index: this.itemSubStore.itemInView.index,
+                        category: this.itemSubStore.itemInView.category
+                    };
+                    let crumbs = this.itemSubStore.itemInView.breadcrumb.split(
+                        "."
+                    ); //Split into traceable obj keys
+
+                    // Set local to new values if valid index aka not -1
+                    if (this.itemSubStore.itemInView.index >= 0) {
+                        this.items[this.itemSubStore.itemInView.index] = {
+                            ...copyData,
+                            ...doc.data()[crumbs[0]][crumbs[1]][crumbs[2]],
+                            ...breadcrumb
+                        };
+                        this.itemSubStore.itemInView = {
+                            ...doc.data()[crumbs[0]][crumbs[1]][crumbs[2]],
+                            ...breadcrumb,
+                            ...copyData
+                        };
+                    }
+                }
+                // update local observable menuSubStore.ItemInView
+                else if (this.menuSubStore.itemInView !== "") {
+                    // copy breadcrumb key/value to new obj
+                    const breadcrumb = {
+                        breadcrumb: this.menuSubStore.itemInView.breadcrumb
+                    };
+                    // data to be passed onto new object
+                    const copyData = {
+                        menu: this.menuSubStore.itemInView.menu,
+                        index: this.menuSubStore.itemInView.index,
+                        category: this.menuSubStore.itemInView.category
+                    };
+                    let crumbs = this.menuSubStore.itemInView.breadcrumb.split(
+                        "."
+                    ); //Split into traceable obj keys
+
+                    // Set local to new values if valid index aka not -1
+                    if (this.menuSubStore.itemInView.index >= 0) {
+                        this.items[this.menuSubStore.itemInView.index] = {
+                            ...copyData,
+                            ...doc.data()[crumbs[0]][crumbs[1]][crumbs[2]],
+                            ...breadcrumb
+                        };
+                        this.menuSubStore.itemInView = {
+                            ...doc.data()[crumbs[0]][crumbs[1]][crumbs[2]],
+                            ...breadcrumb,
+                            ...copyData
+                        };
+                    }
+                }
+                // update entire item storage
+                else {
+                    console.log("resetting all");
+                    
+                    this.items = doc.data();
+                }
+                console.log(toJS(this.items));
+                
+                console.log("done");
+            })
+        );
     }
 
-    this.menuSubStore.menuCats = tempCats;
-  }
+    // will sort all items belonging to the menuInView into there categories
+    @action
+    sortItems() {
+        this.setMenuCategories();
+        let tempCats = [];
+        let menuName = this.menuSubStore.menuInView;
 
-  @action
-  clearItems() {
-    this.items = [];
-  }
+        // make new lane for each known category
+        for (let m of toJS(this.menusTree[`${menuName}`])) {
+            tempCats.push({
+                id: m,
+                title: m,
+                cards: []
+            });
+        }
 
-  // Sets items with new values
-  @action
-  editItem(placeId, path, newVal) {
-    let tempObj = {};
-    tempObj[path] = newVal;
-    RequestHandler.updateDocument("Menus", placeId, tempObj).then(res => {
-      console.log("updated");
-    });
-  }
+        for (let i of toJS(this.items)) {
+            if (i.menu === menuName) {
+                let el0 = toJS(this.menuCategories).indexOf(i.category);
+                tempCats[`${el0}`].cards.push(i);
+            }
+        }
+
+        this.menuSubStore.menuCats = tempCats;
+    }
+
+    @action
+    clearItems() {
+        this.items = [];
+    }
+
+    // Sets items with new values
+    @action
+    editItem(placeId, path, newVal) {
+        let tempObj = {};
+        tempObj[path] = newVal;
+        RequestHandler.updateDocument("Menus", placeId, tempObj).then(res => {
+            console.log("updated");
+        });
+    }
 }
 
 export default new CreateTabStore();
