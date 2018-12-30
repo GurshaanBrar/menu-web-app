@@ -27,12 +27,7 @@ class Items extends Component {
         // sets the menu categories... useful in items modal when selecting new categories
         this.store.setMenuCategories();
     }
-
-    componentWillReceiveProps(newProps) {
-        console.log("RECEVING NEW PROPS");
-        console.log(newProps.CreateTabStore.items);
-    }
-
+    
     // updates the items in display
     _handleSearch(query) {
         var list = this.store.items;

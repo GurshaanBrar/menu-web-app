@@ -62,7 +62,6 @@ export class CreateTabStore {
                             }
                         }
                         this.loading = false;
-                        console.log(this.items);
                     } else {
                         console.log("menu does not exist");
                     }
@@ -83,31 +82,34 @@ export class CreateTabStore {
         }
     }
 
+    // will sort all items into its tree
+    // menu -> categories -> items
+    // menuCategories and menusTree will be written too
     @action
     setMenuCategories() {
         let retObj = {};
         let knownCats = [];
         let knownMenus = [];
+        let len = this.items.length;
 
-        console.log(toJS(this.items));
-        
-        for (let i of this.items) {
-            if (knownMenus.indexOf(i.menu) < 0) {
-                knownMenus.push(i.menu);
-                retObj[i.menu] = [];
+        for (let it = 0; it < len; it++) {
+            let el = this.items[it];
+
+            if (knownMenus.indexOf(el.menu) < 0) {
+                knownMenus.push(el.menu);
+                retObj[el.menu] = [];
             }
         }
 
         // get list of categories
-        for (let i of toJS(this.items)) {
+        for (let it = 0; it < len; it++) {
+            let el = this.items[it];
             // sort only the items in menu in view assuming menu exists
-            if (knownCats.indexOf(i.category) < 0) {
-                knownCats.push(i.category);
-                retObj[i.menu].push(i.category);
+            if (knownCats.indexOf(el.category) < 0) {
+                knownCats.push(el.category);
+                retObj[el.menu].push(el.category);
             }
         }
-
-        console.log(retObj);
 
         this.menuCategories = knownCats;
         this.menusTree = retObj;
@@ -186,13 +188,12 @@ export class CreateTabStore {
                     }
                 }
                 // update entire item storage
-                else {
-                    console.log("resetting all");
-                    
-                    this.items = doc.data();
-                }
-                console.log(toJS(this.items));
-                
+                // else {
+                //     console.log("resetting all");
+
+                //     this.items = doc.data();
+                // }
+
                 console.log("done");
             })
         );
@@ -201,7 +202,9 @@ export class CreateTabStore {
     // will sort all items belonging to the menuInView into there categories
     @action
     sortItems() {
+        // populate menusTree and menuCategories
         this.setMenuCategories();
+
         let tempCats = [];
         let menuName = this.menuSubStore.menuInView;
 
