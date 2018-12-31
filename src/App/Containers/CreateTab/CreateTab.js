@@ -22,7 +22,7 @@ class CreateTab extends Component {
 
   componentDidMount() {
     console.log("listening");
-    
+    this.store.getItems(this.globalStore.placeId);  // Initial Data Fetch
     this.store.setListener(this.globalStore.placeId); // Setup listener on Menus doc
   }
 
@@ -47,13 +47,21 @@ class CreateTab extends Component {
     return(
       <div style={{marginLeft: tempOffset, height:"100%"}}>
       {
-        this.state.loc === 'photos'?
-        (<Photos/>):
-        this.state.loc === 'items'?
-        (<Items/>):
-        this.state.loc === 'menus'?
-        (<Menus/>):
-        (null)
+        this.store.loading?
+        (<div>loading...</div>):
+        (
+          <div>
+          {
+            this.state.loc === 'photos'?
+            (<Photos/>):
+            this.state.loc === 'items'?
+            (<Items/>):
+            this.state.loc === 'menus'?
+            (<Menus/>):
+            (null)
+          }
+          </div>
+        )
       }
       </div>
     )

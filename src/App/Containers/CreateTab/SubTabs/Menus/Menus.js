@@ -18,11 +18,11 @@ class Menus extends Component {
     }
 
     this.store = this.props.CreateTabStore;
-    this.globalStore = this.props.globalStore
+    this.globalStore = this.props.globalStore;
   }
 
   componentDidMount() {
-    this.store.getItems(this.globalStore.placeId, true);  // Initial Data Fetch
+    this.store.sortItems();
   }
 
   _handleSearch(val) {
@@ -30,6 +30,7 @@ class Menus extends Component {
   }
 
   handleClose() {
+    this.store.sortItems();
     this.setState({ show: false });
   }
 
@@ -67,11 +68,7 @@ class Menus extends Component {
       //   </Row>
       // </div>
       <div>
-        {
-          this.store.menuSubStore.loading?
-          (<div>loading...</div>):
-          (<MenuBoard handleShow={this.handleShow.bind(this)}/>)
-        }
+        <MenuBoard handleShow={this.handleShow.bind(this)}/>
         
         {/* modal is available to all components in container */}
         <ItemModal
