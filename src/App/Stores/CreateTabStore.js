@@ -241,6 +241,15 @@ export class CreateTabStore {
             console.log("updated");
         });
     }
+
+    @action
+    addCat() {
+        this.menuSubStore.menuCats.push({
+            id: "test",
+            title: "test",
+            cards: []
+        });
+    }
 }
 
 export default new CreateTabStore();

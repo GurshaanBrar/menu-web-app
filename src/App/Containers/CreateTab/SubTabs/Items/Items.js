@@ -27,7 +27,7 @@ class Items extends Component {
         // sets the menu categories... useful in items modal when selecting new categories
         this.store.setMenuCategories();
     }
-    
+
     // updates the items in display
     _handleSearch(query) {
         var list = this.store.items;
@@ -54,15 +54,6 @@ class Items extends Component {
     }
 
     newItemClickHandler = () => {
-        // create a new item
-        // this.store.setItemInView({
-        //   name: "My New Item",
-        //   uri: "https://livingstonbagel.com/wp-content/uploads/2016/11/food-placeholder.jpg",
-        //   description: "% A good description sells your food! Explain your dish and sell it %",
-        //   price: "% predicted item price range: $ 10 - $ 14 %",
-        // })
-
-        // this.handleShow()
         // set newShow to true to show modal
         // set new show false to ensure item modal doesn't appear
         this.setState({ show: false, newShow: true });
