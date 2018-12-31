@@ -24,7 +24,6 @@ export default class MenuBoard extends Component {
         data={data}
         customCardLayout
         draggable
-        editable
         handleDragEnd={(
           cardId,
           sourceLaneId,
