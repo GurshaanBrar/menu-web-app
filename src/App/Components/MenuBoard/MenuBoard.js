@@ -1,18 +1,24 @@
 import React, { Component } from "react";
 import Board from "react-trello";
 import { inject, observer } from "mobx-react";
-import {  Image, FormControl, Button } from "react-bootstrap";
+import { Image, FormControl, Button } from "react-bootstrap";
 import { toJS } from "mobx";
 
-// const CustomLaneHeader = props => {
+@inject("CreateTabStore")
+@inject("globalStore")
+@observer
 class CustomLaneHeader extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
       editable: false,
+      titleCleanCopy: this.props.title,
       title: this.props.title
     };
+
+    this.store = this.props.CreateTabStore;
+    this.globalStore = this.props.globalStore;
   }
 
   clickHandler() {
@@ -34,12 +40,17 @@ class CustomLaneHeader extends Component {
   }
 
   handleSubmit() {
-    console.log("submit it");
+    this.store.changeCatName(
+      this.globalStore.placeId,
+      this.store.menuSubStore.menuInView,
+      this.state.titleCleanCopy,
+      this.state.title
+    );
+
+    this.setState({ editable: false, titleCleanCopy: this.state.title });
   }
 
   render() {
-    console.log(this.state);
-
     return (
       <div
         style={{
@@ -64,8 +75,13 @@ class CustomLaneHeader extends Component {
               <Button onClick={() => this.handleCancel()}>Cancel</Button>
             </div>
           ) : (
-            <div onClick={() => this.clickHandler()} style={{cursor: "pointer"}}>
-            {this.props.title}   <i className="fas fa-cog" />
+            <div
+              onClick={() => this.clickHandler()}
+              style={{ cursor: "pointer" }}
+            >
+              <header>
+                {this.state.title} <i className="fas fa-cog" />
+              </header> 
             </div>
           )}
         </div>
