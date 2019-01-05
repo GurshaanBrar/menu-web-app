@@ -1,42 +1,91 @@
 import React, { Component } from "react";
 import Board from "react-trello";
-import { Image } from "react-bootstrap";
 import { inject, observer } from "mobx-react";
+import { Image, FormControl, Button } from "react-bootstrap";
 import { toJS } from "mobx";
 
 @inject("CreateTabStore")
+@inject("globalStore")
 @observer
-export default class MenuBoard extends Component {
+class CustomLaneHeader extends Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      editable: false,
+      titleCleanCopy: this.props.title,
+      title: this.props.title
+    };
+
+    this.store = this.props.CreateTabStore;
+    this.globalStore = this.props.globalStore;
+  }
+
+  clickHandler() {
+    console.log(this.state.editable);
+
+    // set state only if it is not already being edited
+    if (!this.state.editable) {
+      this.setState({ editable: true });
+    }
+  }
+
+  // Triggered when editor value changes
+  handleChange(e) {
+    this.setState({ title: e.target.value });
+  }
+
+  handleCancel() {
+    this.setState({ editable: false, title: this.props.title });
+  }
+
+  handleSubmit() {
+    this.store.changeCatName(
+      this.globalStore.placeId,
+      this.store.menuSubStore.menuInView,
+      this.state.titleCleanCopy,
+      this.state.title
+    );
+
+    this.setState({ editable: false, titleCleanCopy: this.state.title });
   }
 
   render() {
-    // This code must be in render to enable realtime updates to data
-    var mapCats = this.props.CreateTabStore.menuSubStore.menuCats;
-
-    const data = {
-      lanes: toJS(mapCats)
-    };
-
     return (
-      <Board
-        data={data}
-        customCardLayout
-        draggable
-        handleDragEnd={(
-          cardId,
-          sourceLaneId,
-          targetLaneId,
-          position,
-          cardDetails
-        ) =>
-          console.log(cardId, sourceLaneId, targetLaneId, position, cardDetails)
-        }
-        style={{ backgroundColor: "inherit" }}
+      <div
+        style={{
+          // borderBottom: '2px solid #c5c5c5',
+          paddingBottom: 6,
+          marginBottom: 10,
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between"
+        }}
       >
-        <CustomCard handleShow={this.props.handleShow} />
-      </Board>
+        <div style={{ fontSize: 14, fontWeight: "bold" }}>
+          {this.state.editable ? (
+            <div>
+              <FormControl
+                type="text"
+                value={this.state.title}
+                placeholder="Enter Title"
+                onChange={this.handleChange.bind(this)}
+              />
+              <Button onClick={() => this.handleSubmit()}>Save</Button>
+              <Button onClick={() => this.handleCancel()}>Cancel</Button>
+            </div>
+          ) : (
+            <div
+              onClick={() => this.clickHandler()}
+              style={{ cursor: "pointer" }}
+            >
+              <header>
+                {this.state.title} <i className="fas fa-cog" />
+              </header> 
+            </div>
+          )}
+        </div>
+      </div>
     );
   }
 }
@@ -80,6 +129,44 @@ class CustomCard extends Component {
           <div>$ {this.props.price}</div>
         </div>
       </div>
+    );
+  }
+}
+
+@inject("CreateTabStore")
+@observer
+export default class MenuBoard extends Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    // This code must be in render to enable realtime updates to data
+    var mapCats = this.props.CreateTabStore.menuSubStore.menuCats;
+
+    const data = {
+      lanes: toJS(mapCats)
+    };
+
+    return (
+      <Board
+        data={data}
+        customCardLayout
+        draggable
+        customLaneHeader={<CustomLaneHeader />}
+        handleDragEnd={(
+          cardId,
+          sourceLaneId,
+          targetLaneId,
+          position,
+          cardDetails
+        ) =>
+          console.log(cardId, sourceLaneId, targetLaneId, position, cardDetails)
+        }
+        style={{ backgroundColor: "inherit" }}
+      >
+        <CustomCard handleShow={this.props.handleShow} />
+      </Board>
     );
   }
 }

@@ -20,6 +20,15 @@ div.col {
   padding-right: 0;
 }
 
+/*
+  used for the menus board, controles height of each lane
+  needed space for search bar above so forces height to shrink
+  from 100vh to x
+ */
+.dJewwL {
+  height: 85vh;
+}
+
 /* GLOBAL COLOR SCHEME */
 :root {
   --prim_one: #262F3D;
