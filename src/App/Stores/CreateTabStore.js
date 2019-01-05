@@ -1,6 +1,5 @@
 import { observable, action, toJS } from "mobx";
 import RequestHandler from "../Services/RequestHandler";
-import { observer } from "mobx-react";
 
 export class CreateTabStore {
   /* #~#~#~#~#~#~ OBSERVABLES #~#~#~#~#~#~# */
@@ -86,30 +85,40 @@ export class CreateTabStore {
   // Updates category names
   // grabs the menu in view from firestore then will do one of the two
   // things. Will create new cat object with new name write it to database then
-  // deletes the old object (essentially replacing) /OR/ Will create new cat object and 
+  // deletes the old object (essentially replacing) /OR/ Will create new cat object and
   // write to database
   @action
   changeCatName(placeId, men, oldCat, newCat) {
     RequestHandler.getDocument("Menus", placeId).then(res => {
       if (res.exists) {
         let catObjCopy = res.data()[`${men}`];
+        console.log(catObjCopy);
+        
+        // If the old key exists replace it
+        if (`${oldCat}` in catObjCopy) {
+          // Make sure the new cat name is not the same as the old
+          if (newCat !== oldCat) {
+            // Taken from stack overflow. does some magic to delete and add keys
+            Object.defineProperty(
+              catObjCopy,
+              newCat,
+              Object.getOwnPropertyDescriptor(catObjCopy, oldCat)
+            );
 
-        // If the key dne in object then create new cat
-        if(!(`${newCat}` in catObjCopy)) {
-            catObjCopy[`${newCat}`] = {};
-        }
-        // replace old cat with new cat (write and del)
-        else if (newCat !== oldCat) {
-          Object.defineProperty(
-            catObjCopy,
-            newCat,
-            Object.getOwnPropertyDescriptor(catObjCopy, oldCat)
-          );
-          delete catObjCopy[oldCat];
-        }
+            // delete the old key
+            delete catObjCopy[oldCat];
 
-        // Update firebase
-        this.editItem("2l2WLstfnWfsYlGEJHdc", `${men}`, catObjCopy)
+            // Update firebase
+            this.editItem("2l2WLstfnWfsYlGEJHdc", `${men}`, catObjCopy);
+          }
+        }
+        // Create new category and add it to firestore
+        else {
+          catObjCopy[`${newCat}`] = {};
+
+          // Update firebase
+          // this.editItem("2l2WLstfnWfsYlGEJHdc", `${men}`, catObjCopy);
+        }
       }
     });
   }
