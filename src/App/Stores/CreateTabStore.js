@@ -92,8 +92,7 @@ export class CreateTabStore {
     RequestHandler.getDocument("Menus", placeId).then(res => {
       if (res.exists) {
         let catObjCopy = res.data()[`${men}`];
-        console.log(catObjCopy);
-        
+
         // If the old key exists replace it
         if (`${oldCat}` in catObjCopy) {
           // Make sure the new cat name is not the same as the old
@@ -117,7 +116,7 @@ export class CreateTabStore {
           catObjCopy[`${newCat}`] = {};
 
           // Update firebase
-          // this.editItem("2l2WLstfnWfsYlGEJHdc", `${men}`, catObjCopy);
+          // this.editItem("placeId", `${men}`, catObjCopy);
         }
       }
     });
@@ -130,6 +129,34 @@ export class CreateTabStore {
       id: "New Category",
       title: "New Category",
       cards: []
+    });
+  }
+
+  // Moves item to a new category and writes update to firestore
+  @action
+  changeItemCategory(placeId, men, itemId, oldCat, newCat) {
+    RequestHandler.getDocument("Menus", placeId).then(res => {
+      if (res.exists && oldCat !== newCat) {
+        let catObjCopy = res.data()[`${men}`];
+        let itemObjCopy = catObjCopy[`${oldCat}`][`${itemId}`];
+
+        // if the newCat is literally a newly added category ie it dne in firestore
+        if(catObjCopy[`${newCat}`] === undefined) {         
+          let tempObj = {};
+          tempObj[`${newCat}`] = {type_description: ""};
+  
+          // merge the new obj with catObjCopy
+          catObjCopy = {...catObjCopy, ...tempObj}       
+        }
+
+        // add object to the new category
+        catObjCopy[`${newCat}`][`${itemId}`] = itemObjCopy;
+        // delete object from the old category
+        delete catObjCopy[`${oldCat}`][`${itemId}`];
+
+        // Update firebase
+        this.editItem(placeId, `${men}`, catObjCopy);
+      }
     });
   }
 
