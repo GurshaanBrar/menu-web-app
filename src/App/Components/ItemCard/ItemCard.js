@@ -35,7 +35,7 @@ class ItemCard extends React.Component {
     this.store.setItemInView(this.props.data, "item");
 
     this.props.handleShow() 
-  }
+  }  
 
   render() {    
     return (
