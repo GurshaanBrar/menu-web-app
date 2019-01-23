@@ -95,7 +95,7 @@ class CustomLaneHeader extends Component {
 class CustomCard extends Component {
   constructor(props) {
     super(props);
-
+    
     this.store = this.props.CreateTabStore;
   }
 
@@ -134,11 +134,16 @@ class CustomCard extends Component {
 }
 
 @inject("CreateTabStore")
+@inject("globalStore")
 @observer
 export default class MenuBoard extends Component {
   constructor(props) {
     super(props);
+    
+    this.store = this.props.CreateTabStore;
+    this.globalStore = this.props.globalStore;
   }
+
 
   render() {
     // This code must be in render to enable realtime updates to data
@@ -161,7 +166,7 @@ export default class MenuBoard extends Component {
           position,
           cardDetails
         ) =>
-          console.log(cardId, sourceLaneId, targetLaneId, position, cardDetails)
+          this.store.changeItemCategory(this.globalStore.placeId, this.store.menuSubStore.menuInView, cardId, sourceLaneId, targetLaneId)
         }
         style={{ backgroundColor: "inherit" }}
       >

@@ -98,6 +98,7 @@ class Items extends Component {
                             }}
                         >
                             <ItemsPreview
+                                isItem = {true}
                                 listOfItems={this.state.displayItems}
                                 handleShow={this.handleShow.bind(this)}
                             />

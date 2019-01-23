@@ -16,7 +16,7 @@ class ItemModal extends Component {
     this.state = {
       isWide: mql.matches, // if screen is wide enough modal will have some padding
       editArea: "",
-      editAreaValue: ""
+      editAreaValue: "",
     };
 
     this.mediaQueryChanged = this.mediaQueryChanged.bind(this);
@@ -47,17 +47,25 @@ class ItemModal extends Component {
 
   // Triggered when editor value changes
   handleChange(e) {
-    this.setState({ editAreaValue: e.target.value });
+      this.setState({editAreaValue: e.target.value });
+
+
   }
 
   // triggered when save button is pressed
   _handleSubmit() {
-    this.store.editItem(
-      this.globalStore.placeId,
-      `${this.props.itemInView.breadcrumb}.${this.state.editArea}`,
-      this.state.editAreaValue
-    );
-    this.setState({ editArea: "", editAreaValue: "" });
+    if (this.state.editArea === "category") {
+      this.store.changeItemCategory(this.globalStore.placeId, this.props.itemInView.menu, this.props.itemInView.id, this.props.itemInView.category, this.state.editAreaValue);
+      this.setState({ editArea: "", editAreaValue: "" });
+    } 
+    else {
+      this.store.editItem(
+        this.globalStore.placeId,
+        `${this.props.itemInView.breadcrumb}.${this.state.editArea}`,
+        this.state.editAreaValue
+      );
+      this.setState({ editArea: "", editAreaValue: "" });
+    }
   }
 
   // Triggered when cancel button is pressed
@@ -115,7 +123,7 @@ class ItemModal extends Component {
         <Button onClick={this._handleCancel.bind(this)}>Cancel</Button>
       </div>
     );
-          
+
     const editor_dropdown = (
       <div>
         <FormControl
@@ -274,7 +282,7 @@ class ItemModal extends Component {
               >
                 <Row>
                   <Col xs={9} md={10}>
-                    Menus
+                    Category
                   </Col>
                   <Col xs={3} md={2}>
                     <i className={this.editIcon} />
@@ -284,7 +292,7 @@ class ItemModal extends Component {
               <div style={{ paddingTop: "4%" }}>
                 <Row>
                   <Col md={12}>
-                    {this.state.editArea === "menus" ? (
+                    {this.state.editArea === "category" ? (
                       editor_dropdown
                     ) : (
                       <div>

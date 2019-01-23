@@ -15,8 +15,23 @@ export class CreateTabStore {
     loading: true,
     menuCats: [],
     itemInView: "",
-    menuInView: "Food Menu"
+    menuInView: "",
+    menuTypes:[
+      { 
+        name:'Lunch',
+        uri: 'https://www.ycdsb.ca/sms/wp-content/uploads/sites/90/2017/10/lunch-1200x1200.jpeg',
+      },
+      { 
+        name:'Brunch',
+        uri: 'https://images-na.ssl-images-amazon.com/images/I/61n8O21K6vL._SX258_BO1,204,203,200_.jpg',
+      },
+      { 
+        name:'Dinner',
+        uri: 'https://images-na.ssl-images-amazon.com/images/I/61O6jnlbiTL._SX258_BO1,204,203,200_.jpg',
+      } 
+    ],
   };
+
 
   /* #~#~#~#~#~#~ ACTIONS #~#~#~#~#~#~# */
 
@@ -92,8 +107,7 @@ export class CreateTabStore {
     RequestHandler.getDocument("Menus", placeId).then(res => {
       if (res.exists) {
         let catObjCopy = res.data()[`${men}`];
-        console.log(catObjCopy);
-        
+
         // If the old key exists replace it
         if (`${oldCat}` in catObjCopy) {
           // Make sure the new cat name is not the same as the old
@@ -117,7 +131,7 @@ export class CreateTabStore {
           catObjCopy[`${newCat}`] = {};
 
           // Update firebase
-          // this.editItem("2l2WLstfnWfsYlGEJHdc", `${men}`, catObjCopy);
+          // this.editItem("placeId", `${men}`, catObjCopy);
         }
       }
     });
@@ -133,6 +147,34 @@ export class CreateTabStore {
     });
   }
 
+  // Moves item to a new category and writes update to firestore
+  @action
+  changeItemCategory(placeId, men, itemId, oldCat, newCat) {
+    RequestHandler.getDocument("Menus", placeId).then(res => {
+      if (res.exists && oldCat !== newCat) {
+        let catObjCopy = res.data()[`${men}`];
+        let itemObjCopy = catObjCopy[`${oldCat}`][`${itemId}`];
+
+        // if the newCat is literally a newly added category ie it dne in firestore
+        if(catObjCopy[`${newCat}`] === undefined) {         
+          let tempObj = {};
+          tempObj[`${newCat}`] = {type_description: ""};
+  
+          // merge the new obj with catObjCopy
+          catObjCopy = {...catObjCopy, ...tempObj}       
+        }
+
+        // add object to the new category
+        catObjCopy[`${newCat}`][`${itemId}`] = itemObjCopy;
+        // delete object from the old category
+        delete catObjCopy[`${oldCat}`][`${itemId}`];
+
+        // Update firebase
+        this.editItem(placeId, `${men}`, catObjCopy);
+      }
+    });
+  }
+
   /****** 3) Writes to local store ******/
 
   // Changes the item which will appear in modal
@@ -144,6 +186,12 @@ export class CreateTabStore {
       this.menuSubStore.itemInView = newItem;
     }
   }
+
+   // Changes the item which will appear in modal
+   @action
+   setMenuInView(newMenuInView) {
+    this.menuSubStore.menuInView = newMenuInView;
+   }
 
   // will sort all items into its tree
   // menu -> categories -> items
@@ -187,7 +235,8 @@ export class CreateTabStore {
         includeMetadataChanges: true
       },
       action("success", doc => {
-        console.log("has been changed");
+        console.log(this.itemSubStore.itemInView);
+
 
         // Update local observable itemSubStore.itemInView
         if (this.itemSubStore.itemInView !== "") {
