@@ -95,7 +95,7 @@ class CustomLaneHeader extends Component {
 class CustomCard extends Component {
   constructor(props) {
     super(props);
-
+    
     this.store = this.props.CreateTabStore;
   }
 
@@ -139,7 +139,7 @@ class CustomCard extends Component {
 export default class MenuBoard extends Component {
   constructor(props) {
     super(props);
-
+    
     this.store = this.props.CreateTabStore;
     this.globalStore = this.props.globalStore;
   }

@@ -15,8 +15,23 @@ export class CreateTabStore {
     loading: true,
     menuCats: [],
     itemInView: "",
-    menuInView: "Food Menu"
+    menuInView: "",
+    menuTypes:[
+      { 
+        name:'Lunch',
+        uri: 'https://www.ycdsb.ca/sms/wp-content/uploads/sites/90/2017/10/lunch-1200x1200.jpeg',
+      },
+      { 
+        name:'Brunch',
+        uri: 'https://images-na.ssl-images-amazon.com/images/I/61n8O21K6vL._SX258_BO1,204,203,200_.jpg',
+      },
+      { 
+        name:'Dinner',
+        uri: 'https://images-na.ssl-images-amazon.com/images/I/61O6jnlbiTL._SX258_BO1,204,203,200_.jpg',
+      } 
+    ],
   };
+
 
   /* #~#~#~#~#~#~ ACTIONS #~#~#~#~#~#~# */
 
@@ -172,6 +187,12 @@ export class CreateTabStore {
     }
   }
 
+   // Changes the item which will appear in modal
+   @action
+   setMenuInView(newMenuInView) {
+    this.menuSubStore.menuInView = newMenuInView;
+   }
+
   // will sort all items into its tree
   // menu -> categories -> items
   // menuCategories and menusTree will be written too
@@ -214,7 +235,8 @@ export class CreateTabStore {
         includeMetadataChanges: true
       },
       action("success", doc => {
-        console.log("has been changed");
+        console.log(this.itemSubStore.itemInView);
+
 
         // Update local observable itemSubStore.itemInView
         if (this.itemSubStore.itemInView !== "") {

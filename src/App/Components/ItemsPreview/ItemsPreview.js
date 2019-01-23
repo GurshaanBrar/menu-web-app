@@ -17,15 +17,13 @@ class ItemsPreview extends Component {
     this.store = this.props.CreateTabStore
   }
 
-
-
   render() {
       return(
         <div className="item-preview-cont">
         {
           this.props.listOfItems.map((d, count) => {
             return(
-              <ItemCard key={d.uri} data={d} count={count} handleShow={this.props.handleShow}/>
+              <ItemCard isItem={this.props.isItem} key={d.uri} data={d} count={count} handleShow={this.props.handleShow}/>
             )
           })
         }
