@@ -59,7 +59,7 @@ class Menus extends Component {
     return (
       <div>
         <Row className="show-grid">
-          <Col xs={1} md={2}>
+          <Col xs={1} md={1}>
             {/* SPACING */}
           </Col>
           <Col xs={1} md={2} style={{ marginTop: "2%" }}>
