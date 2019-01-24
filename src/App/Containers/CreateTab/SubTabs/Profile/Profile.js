@@ -62,7 +62,7 @@ class Profile extends Component {
               <Col xs={12} md={6} style={{ alignItems: "center" }}>
                 <Image
                   style={{ width: "100%" }}
-                  src="https://www.cactusclubcafe.com/wp-content/uploads/2016/05/111915_FullBleedImage_TORO_Locations_Header_1160px_500px_web_v1_NoText.jpg"
+                  src={pData.cover_uri}
                 />
                 <div style={{ marginTop: "4%" }}>
                   <h4 style={{ textAlign: "center" }}>
