@@ -1,5 +1,6 @@
 import { observable, action, toJS } from "mobx";
 import RequestHandler from "../Services/RequestHandler";
+var moment = require("moment");
 
 export class CreateTabStore {
   /* #~#~#~#~#~#~ OBSERVABLES #~#~#~#~#~#~# */
@@ -8,6 +9,10 @@ export class CreateTabStore {
   @observable menus = [];
   @observable menuCategories = [];
   @observable menusTree = [];
+  @observable profileSubStore = {
+    loading: true,
+    profileData: {}
+  };
   @observable itemSubStore = {
     itemInView: ""
   };
@@ -16,22 +21,24 @@ export class CreateTabStore {
     menuCats: [],
     itemInView: "",
     menuInView: "",
-    menuTypes:[
-      { 
-        name:'Lunch',
-        uri: 'https://www.ycdsb.ca/sms/wp-content/uploads/sites/90/2017/10/lunch-1200x1200.jpeg',
+    menuTypes: [
+      {
+        name: "Lunch",
+        uri:
+          "https://www.ycdsb.ca/sms/wp-content/uploads/sites/90/2017/10/lunch-1200x1200.jpeg"
       },
-      { 
-        name:'Brunch',
-        uri: 'https://images-na.ssl-images-amazon.com/images/I/61n8O21K6vL._SX258_BO1,204,203,200_.jpg',
+      {
+        name: "Brunch",
+        uri:
+          "https://images-na.ssl-images-amazon.com/images/I/61n8O21K6vL._SX258_BO1,204,203,200_.jpg"
       },
-      { 
-        name:'Dinner',
-        uri: 'https://images-na.ssl-images-amazon.com/images/I/61O6jnlbiTL._SX258_BO1,204,203,200_.jpg',
-      } 
-    ],
+      {
+        name: "Dinner",
+        uri:
+          "https://images-na.ssl-images-amazon.com/images/I/61O6jnlbiTL._SX258_BO1,204,203,200_.jpg"
+      }
+    ]
   };
-
 
   /* #~#~#~#~#~#~ ACTIONS #~#~#~#~#~#~# */
 
@@ -83,6 +90,75 @@ export class CreateTabStore {
       .catch(err => {
         console.log(err);
       });
+  }
+
+  // This function grabs all the info for place with placeId and converts database time 
+  // to human readable time
+  @action
+  getPlaceData(placeId) {
+    RequestHandler.getDocument("Places", placeId).then(
+      action("success", res => {
+        if (res.exists) {
+
+          let tempRetObj = { hours: []};
+          let count = 0;
+
+          for (let h of res.data().hours) {
+
+            // split time into hours and mins and convert to number
+            var openHour = Number(h.open.split(":")[0]);
+            var openMin = Number(h.open.split(":")[1]);
+            var openForHour = Number(h.open_for.split(":")[0]);
+            var openForMin = Number(h.open_for.split(":")[1]);
+            var closeTime = "23:00"; //the one and only close time :)
+            var minSum = openMin + openForMin;
+            var offset = 0;
+
+            // when added openForMin+openMin can be >= 60 which is invalid, this will reset the mins and add one to hour
+            if (minSum >= 60) {
+              openForMin = minSum - 60;
+              offset = 1;
+            }
+
+            // convert to decimal time representation (. instead of :)
+            var openDec = openHour + openMin / 100;
+            var closeDec = offset + openHour + openForHour + openForMin / 100;
+
+            // format the close time if its not correct
+            if (closeDec >= 24) {
+              var tempHour = openHour + openForHour - 24;
+              var tempMin = openForMin;
+
+              if (tempHour === 0) {
+                tempHour = "00";
+                tempMin = "00";
+              } else {
+                if (tempHour < 10) {
+                  tempHour = `0${tempHour}`;
+                }
+                if (tempMin < 10) {
+                  tempMin = `0${tempMin}`;
+                }
+              }
+
+              closeTime = `${tempHour}:${tempMin}`;
+            }
+
+            // insert object by day 0=sunday 6=sat
+            tempRetObj.hours[count] = {
+              opens: (moment(h.open, "HH:mm").format('h:mm a')),
+              closes: (moment(closeTime, "HH:mm").format('h:mm a'))
+            }
+  
+            // increment count to next day
+            count++;
+          }
+          
+          this.profileSubStore.profileData = { ...res.data(), ...tempRetObj};
+          this.profileSubStore.loading = false;
+        }
+      })
+    );
   }
 
   /****** 2) Writes to firestore ******/
@@ -156,12 +232,12 @@ export class CreateTabStore {
         let itemObjCopy = catObjCopy[`${oldCat}`][`${itemId}`];
 
         // if the newCat is literally a newly added category ie it dne in firestore
-        if(catObjCopy[`${newCat}`] === undefined) {         
+        if (catObjCopy[`${newCat}`] === undefined) {
           let tempObj = {};
-          tempObj[`${newCat}`] = {type_description: ""};
-  
+          tempObj[`${newCat}`] = { type_description: "" };
+
           // merge the new obj with catObjCopy
-          catObjCopy = {...catObjCopy, ...tempObj}       
+          catObjCopy = { ...catObjCopy, ...tempObj };
         }
 
         // add object to the new category
@@ -187,11 +263,11 @@ export class CreateTabStore {
     }
   }
 
-   // Changes the item which will appear in modal
-   @action
-   setMenuInView(newMenuInView) {
+  // Changes the item which will appear in modal
+  @action
+  setMenuInView(newMenuInView) {
     this.menuSubStore.menuInView = newMenuInView;
-   }
+  }
 
   // will sort all items into its tree
   // menu -> categories -> items
@@ -236,7 +312,6 @@ export class CreateTabStore {
       },
       action("success", doc => {
         console.log(this.itemSubStore.itemInView);
-
 
         // Update local observable itemSubStore.itemInView
         if (this.itemSubStore.itemInView !== "") {
