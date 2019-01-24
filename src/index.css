@@ -1,6 +1,6 @@
 body {
   font-family: sans-serif;
-  background-color: var(--grey);
+  background-color: white;
   color: var(--denim);
   overflow: hidden;
 }

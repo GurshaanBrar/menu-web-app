@@ -20,7 +20,7 @@ class App extends Component {
         this.push = this.props.routing.push;
         this.connections = {
             n1: "",
-            n2_s1: "create/photos",
+            n2_s1: "create/profile",
             n2_s2: "create/items",
             n2_s3: "create/menus",
             n3_s1: "analyze/dashboard",
@@ -204,7 +204,7 @@ class App extends Component {
                         {/* n2_s1 */}
                         <NavItem eventKey="n2_s1" style={{background: 'var(--prim_three)', marginTop:0}}>
                             <NavText style={{color: n2_s1}}>
-                                Photos
+                                Profile
                             </NavText>
                         </NavItem>
                         {/* n2_s2 */}
