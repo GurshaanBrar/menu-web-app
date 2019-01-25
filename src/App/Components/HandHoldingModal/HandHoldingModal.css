@@ -1,0 +1,12 @@
+.circleBase {
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    border: 1px solid grey;
+    margin-right: 0.5%;
+    margin-left: 0.5%;
+}
+
+.filled {
+    background: #286090;
+}

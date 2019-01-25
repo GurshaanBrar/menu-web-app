@@ -3,6 +3,13 @@ body {
   background-color: white;
   color: var(--denim);
   overflow: hidden;
+
+  /* White Marble Background */
+  background: url('https://www.fg-a.com/wallpapers/white-marble-3-2018.jpg') no-repeat center center fixed; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
 }
 
 div.grid {

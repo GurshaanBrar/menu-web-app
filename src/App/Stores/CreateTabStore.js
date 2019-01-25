@@ -121,7 +121,7 @@ export class CreateTabStore {
             }
 
             // convert to decimal time representation (. instead of :)
-            var openDec = openHour + openMin / 100;
+
             var closeDec = offset + openHour + openForHour + openForMin / 100;
 
             // format the close time if its not correct

@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
-import { Row, Col, Image, Table } from "react-bootstrap";
-import ItemModal from "../../../../Components/ItemModal/ItemModal";
+import { Row, Col, Image, Table, Button } from "react-bootstrap";
+import HandHoldingModal from "../../../../Components/HandHoldingModal/HandHoldingModal";
 
 @inject("CreateTabStore")
 @inject("globalStore")
@@ -29,13 +29,16 @@ class Profile extends Component {
 
   // closes the modal
   handleClose() {
-    this.store.sortItems();
     this.setState({ show: false });
   }
 
   // opens the modal
   handleShow() {
     this.setState({ show: true });
+  }
+
+  handleSave() {
+    this.setState({ show: false })
   }
 
   render() {
@@ -159,14 +162,22 @@ class Profile extends Component {
                     </tbody>
                   </Table>
                 </div>
+                <Button onClick={() => this.handleShow()} style={{ marginTop: "4%" }}><i className="fas fa-edit"></i> Edit</Button>
               </Col>
             </Row>
 
             {/* modal is available to all components in container */}
-            <ItemModal
-              itemInView={this.store.menuSubStore.itemInView}
+            <HandHoldingModal
               handleClose={this.handleClose.bind(this)}
               show={this.state.show}
+              title={"Edit Profile"}
+              handleSave={() => this.handleSave()}
+              pages={[
+                <div>0ne</div>,
+                <div>two</div>,
+                <div>three</div>,
+                <div>four</div>
+              ]}
             />
           </div>
         ) : (
