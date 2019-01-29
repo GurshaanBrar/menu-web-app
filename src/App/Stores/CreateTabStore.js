@@ -302,6 +302,13 @@ export class CreateTabStore {
     this.menusTree = retObj;
   }
 
+  @action
+  setProfileData(key, newVal) {
+    this.profileSubStore.loading = true;
+    this.profileSubStore.profileData[`${key}`] = newVal;
+    this.profileSubStore.loading = false;
+  }
+
   // This creates the listener for the menus doc,
   // If the document changes, the local values will be updated to mach the db
   @action

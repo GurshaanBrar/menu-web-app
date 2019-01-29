@@ -43,6 +43,11 @@ class HandHoldingModal extends Component {
     });
   }
 
+  handleSave() {
+    this.setState({pageInView: 0}) 
+    this.props.handleSave();
+  }
+
   render() {
     // controls width of modal
     // if browser is wide then have padding on sides else have full width modal
@@ -93,7 +98,7 @@ class HandHoldingModal extends Component {
             }
           })}
           {this.state.pageInView >= this.state.pages.length - 1 ? (
-            <Button onClick={() => this.props.handleSave()} bsStyle="primary" style={{ marginLeft: "2%" }}>
+            <Button onClick={() => this.handleSave()} bsStyle="primary" style={{ marginLeft: "2%" }}>
               Save
             </Button>
           ) : (
