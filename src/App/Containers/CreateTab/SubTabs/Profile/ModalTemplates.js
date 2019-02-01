@@ -172,7 +172,6 @@ class DataTemplate extends Component {
               value={this.state.address}
               placeholder="Enter address."
               onChange={e => this.changeAddress(e)}
-
             />
           </Col>
         </Row>
@@ -209,9 +208,161 @@ class DataTemplate extends Component {
   }
 }
 
+class HoursTemplate extends Component {
+  constructor(props) {
+    super(props);
+
+    this.hours = [];
+    this.mins = [];
+    this.daysOfTheWeek = [
+      "Sunday   ",
+      "Monday   ",
+      "Tuesday  ",
+      "Wednesday",
+      "Thursday ",
+      "Friday   ",
+      "Saturday "
+    ];
+
+    for (let i = 0; i < 60; i++) {
+      if (i < 24) {
+        this.hours.push(i);
+      }
+      this.mins.push(i);
+    }
+
+    this.state = {};
+  }
+
+  handleChange(e) {
+    console.log(e.target.value);
+  }
+
+  render() {
+    return (
+      <div style={{ marginLeft: "7%", marginRight: "7%", marginTop: "1%" }}>
+        <h4>Place Hours</h4>
+        <p>Enter the hours your place is open for each day</p>
+        <br/>
+        <br/>
+        {this.daysOfTheWeek.map(day => {
+          return (
+            <div>
+              <Row className="show-grid">
+                <Col
+                  xs={2}
+                  md={2}
+                  style={{ display: "flex", flexDirection: "row" }}
+                >
+                  <p style={{ marginRight: "1%", marginTop: "0.5%" }}>
+                    <b>{day}:{" "}</b>
+                  </p>
+                </Col>
+                <Col
+                  xs={10}
+                  md={10}
+                  style={{ display: "flex", flexDirection: "row" }}
+                >
+                  <p style={{ marginRight: "1%", marginTop: "0.5%" }}>
+                    Open at
+                  </p>
+                  <div style={{ marginRight: "1%" }}>
+                    <FormControl
+                      componentClass="select"
+                      onChange={this.handleChange.bind(this)}
+                    >
+                      <option>{""}</option>
+                      {this.hours.map(hour => {
+                        return <option value={hour}>{hour}</option>;
+                      })}
+                    </FormControl>
+                  </div>
+                  <p style={{ marginRight: "1%", marginTop: "0.5%" }}>
+                    <b>:</b>
+                  </p>
+                  <div style={{ marginRight: "1%" }}>
+                    <FormControl
+                      componentClass="select"
+                      onChange={this.handleChange.bind(this)}
+                    >
+                      <option>{""}</option>
+                      {this.mins.map(hour => {
+                        return <option value={hour}>{hour}</option>;
+                      })}
+                    </FormControl>
+                  </div>
+                  <p style={{ marginRight: "1%", marginTop: "0.5%" }}>
+                    , open for in
+                  </p>
+                  <div style={{ marginRight: "1%" }}>
+                    <FormControl
+                      componentClass="select"
+                      onChange={this.handleChange.bind(this)}
+                    >
+                      <option>{""}</option>
+                      {this.hours.map(hour => {
+                        return <option value={hour}>{hour}</option>;
+                      })}
+                    </FormControl>
+                  </div>
+                  <p style={{ marginRight: "1%", marginTop: "0.5%" }}>
+                    <b>:</b>
+                  </p>
+                  <div style={{ marginRight: "1%" }}>
+                    <FormControl
+                      componentClass="select"
+                      onChange={this.handleChange.bind(this)}
+                    >
+                      <option>{""}</option>
+                      {this.mins.map(hour => {
+                        return <option value={hour}>{hour}</option>;
+                      })}
+                    </FormControl>
+                  </div>
+                  <p style={{ marginRight: "1%", marginTop: "0.5%" }}>hours.</p>
+                </Col>
+              </Row>
+            </div>
+          );
+        })}
+        {/* <Col xs={3} md={3}>
+            <p>Sunday: </p>
+          </Col>
+          <Col xs={2} md={2}>
+            Open at
+          </Col>
+          <Col xs={2} md={2}>
+            <div>
+                <FormControl
+                    componentClass="select"
+                    onChange={this.handleChange.bind(this)}
+                >
+                    <option>{""}</option>
+                </FormControl>
+            </div>
+          </Col>
+          <Col xs={2} md={2}>
+            for
+          </Col>
+          <Col xs={2} md={2}>
+            <div>
+                <FormControl
+                    componentClass="select"
+                    onChange={this.handleChange.bind(this)}
+                >
+                    <option>{""}</option>
+                </FormControl>
+            </div>
+          </Col> */}
+      </div>
+    );
+  }
+}
+
 export {
   CoverImageTemplate,
   DescriptionTemplate,
   IconImageTemplate,
-  DataTemplate
+  DataTemplate,
+  HoursTemplate
 };

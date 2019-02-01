@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
 import { Row, Col, Image, Table, Button } from "react-bootstrap";
 import HandHoldingModal from "../../../../Components/HandHoldingModal/HandHoldingModal";
-import { CoverImageTemplate, DescriptionTemplate, IconImageTemplate, DataTemplate} from "./ModalTemplates";
+import { CoverImageTemplate, DescriptionTemplate, IconImageTemplate, DataTemplate, HoursTemplate} from "./ModalTemplates";
 
 @inject("CreateTabStore")
 @inject("globalStore")
@@ -213,7 +213,8 @@ class Profile extends Component {
                   handleChange={(e, key) =>
                     this.store.setProfileData(key, e.target.value)
                   }
-                />
+                />,
+                <HoursTemplate/>
               ]}
             />
           </div>
