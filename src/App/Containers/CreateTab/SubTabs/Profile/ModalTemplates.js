@@ -225,27 +225,72 @@ class HoursTemplate extends Component {
     ];
 
     for (let i = 0; i < 60; i++) {
-      if (i < 24) {
-        this.hours.push(i);
+      let stringHour = `${i}`;
+                        
+      if (i < 10) {
+        stringHour = `0${i}`;
       }
-      this.mins.push(i);
+
+      if (i < 24) {
+        this.hours.push(stringHour);
+      }
+      this.mins.push(stringHour);
     }
 
-    this.state = {};
+    this.state = {
+      open_hours:[],
+      open_mins: [],
+      open_for_hours: [],
+      open_for_mins: []
+    };
   }
 
-  handleChange(e) {
-    console.log(e.target.value);
+  handleChange(e, type, day) {
+
+    switch (type) {
+      case "open_hours":
+        var temp = this.state.open_hours;
+        temp[day] = e.target.value;
+        
+        this.setState({"open_hours": temp})
+        break;
+
+      case "open_mins":
+        var temp = this.state.open_mins;
+        temp[day] = e.target.value;
+        
+        this.setState({"open_mins": temp})
+        break;
+
+      case "open_for_hours":
+        var temp = this.state.open_for_hours;
+        temp[day] = e.target.value;
+        
+        this.setState({"open_for_hours": temp})
+        break;
+
+      case "open_for_mins":
+        var temp = this.state.open_for_mins;
+        temp[day] = e.target.value;
+        
+        this.setState({"open_for_mins": temp})
+        break;
+    
+      default:
+        break;
+    }    
   }
 
   render() {
+    console.log(this.state);
+    
     return (
       <div style={{ marginLeft: "7%", marginRight: "7%", marginTop: "1%" }}>
         <h4>Place Hours</h4>
         <p>Enter the hours your place is open for each day</p>
-        <br/>
-        <br/>
-        {this.daysOfTheWeek.map(day => {
+        <br />
+        <br />
+        {this.daysOfTheWeek.map((day, count) => {
           return (
             <div>
               <Row className="show-grid">
@@ -255,7 +300,7 @@ class HoursTemplate extends Component {
                   style={{ display: "flex", flexDirection: "row" }}
                 >
                   <p style={{ marginRight: "1%", marginTop: "0.5%" }}>
-                    <b>{day}:{" "}</b>
+                    <b>{day}: </b>
                   </p>
                 </Col>
                 <Col
@@ -269,7 +314,7 @@ class HoursTemplate extends Component {
                   <div style={{ marginRight: "1%" }}>
                     <FormControl
                       componentClass="select"
-                      onChange={this.handleChange.bind(this)}
+                      onChange={(e) => this.handleChange(e, "open_hours", count)}
                     >
                       <option>{""}</option>
                       {this.hours.map(hour => {
@@ -283,7 +328,7 @@ class HoursTemplate extends Component {
                   <div style={{ marginRight: "1%" }}>
                     <FormControl
                       componentClass="select"
-                      onChange={this.handleChange.bind(this)}
+                      onChange={(e) => this.handleChange(e, "open_mins", count)}
                     >
                       <option>{""}</option>
                       {this.mins.map(hour => {
@@ -292,12 +337,12 @@ class HoursTemplate extends Component {
                     </FormControl>
                   </div>
                   <p style={{ marginRight: "1%", marginTop: "0.5%" }}>
-                    , open for in
+                    , open for
                   </p>
                   <div style={{ marginRight: "1%" }}>
                     <FormControl
                       componentClass="select"
-                      onChange={this.handleChange.bind(this)}
+                      onChange={(e) => this.handleChange(e, "open_for_hours", count)}
                     >
                       <option>{""}</option>
                       {this.hours.map(hour => {
@@ -311,7 +356,7 @@ class HoursTemplate extends Component {
                   <div style={{ marginRight: "1%" }}>
                     <FormControl
                       componentClass="select"
-                      onChange={this.handleChange.bind(this)}
+                      onChange={(e) => this.handleChange(e, "open_for_mins", count)}
                     >
                       <option>{""}</option>
                       {this.mins.map(hour => {
