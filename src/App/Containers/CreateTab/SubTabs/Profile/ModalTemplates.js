@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { FormControl, Image, Col, Row } from "react-bootstrap";
+var moment = require("moment");
 
 class CoverImageTemplate extends Component {
   constructor(props) {
@@ -28,6 +29,7 @@ class CoverImageTemplate extends Component {
             type="text"
             placeholder="Enter URL here."
             onChange={e => this.handleChange(e)}
+            value={this.state.tempUrl}
           />
         </div>
         <br />
@@ -79,6 +81,7 @@ class IconImageTemplate extends Component {
               <FormControl
                 type="text"
                 placeholder="Enter URL here."
+                value={this.state.tempUrl}
                 onChange={e => this.handleChange(e)}
               />
             </div>
@@ -136,7 +139,8 @@ class DataTemplate extends Component {
     this.state = {
       address: this.props.value.address,
       phone: this.props.value.phone_number,
-      website: this.props.value.website
+      website: this.props.value.website,
+      name: this.props.value.name
     };
   }
 
@@ -155,6 +159,11 @@ class DataTemplate extends Component {
     this.props.handleChange(e, "website");
   }
 
+  changeName(e) {
+    this.setState({ name: e.target.value });
+    this.props.handleChange(e, "name");
+  }
+
   render() {
     return (
       <div style={{ marginLeft: "7%", marginRight: "7%", marginTop: "1%" }}>
@@ -162,6 +171,20 @@ class DataTemplate extends Component {
         <p>Enter the necessary info for your place.</p>
         <br />
         <br />
+        <Row className="show-grid">
+          <Col xs={3} md={3}>
+            <p>Name: </p>
+          </Col>
+          <Col xs={9} md={9}>
+            <FormControl
+              type="text"
+              value={this.state.name}
+              placeholder="Enter address."
+              onChange={e => this.changeName(e)}
+            />
+          </Col>
+        </Row>
+        <br/>
         <Row className="show-grid">
           <Col xs={3} md={3}>
             <p>Address: </p>
@@ -223,6 +246,10 @@ class HoursTemplate extends Component {
       "Friday   ",
       "Saturday "
     ];
+    let temp_open_hours = [];
+    let temp_open_mins = [];
+    let temp_open_for_hours = [];
+    let temp_open_for_mins = [];
 
     for (let i = 0; i < 60; i++) {
       let stringHour = `${i}`;
@@ -237,43 +264,61 @@ class HoursTemplate extends Component {
       this.mins.push(stringHour);
     }
 
+    for(let time of this.props.times) {
+      let open = time.open.split(":");
+      let open_for = time.open_for.split(":");
+      
+      temp_open_hours.push(open[0]);
+      temp_open_mins.push(open[1]);
+      temp_open_for_hours.push(open_for[0]);
+      temp_open_for_mins.push(open_for[1]);
+    }
+   
+
     this.state = {
-      open_hours:[],
-      open_mins: [],
-      open_for_hours: [],
-      open_for_mins: []
+      open_hours: temp_open_hours,
+      open_mins: temp_open_mins,
+      open_for_hours: temp_open_for_hours,
+      open_for_mins: temp_open_for_mins
     };
   }
 
+  // when times are changed update store.
   handleChange(e, type, day) {
+    let temp = null;
 
+    // change based on what type of hour is being set.
     switch (type) {
       case "open_hours":
-        var temp = this.state.open_hours;
+        temp = this.state.open_hours;
         temp[day] = e.target.value;
         
         this.setState({"open_hours": temp})
+        this.props.handleChange(`hours.${day}.open`, moment(`${e.target.value}:${this.state.open_mins[day]}`, "HH:mm").format('h:mm a'));
         break;
 
       case "open_mins":
-        var temp = this.state.open_mins;
+        temp = this.state.open_mins;
         temp[day] = e.target.value;
         
-        this.setState({"open_mins": temp})
+        this.setState({"open_mins": temp});
+        this.props.handleChange(`hours.${day}.open`, moment(`${this.state.open_hours[day]}:${e.target.value}`, "HH:mm").format('h:mm a'));
         break;
 
       case "open_for_hours":
-        var temp = this.state.open_for_hours;
+        temp = this.state.open_for_hours;
         temp[day] = e.target.value;
         
-        this.setState({"open_for_hours": temp})
+        this.setState({"open_for_hours": temp});
+        this.props.handleChange(`hours.${day}.open_for`, moment(`${e.target.value}:${this.state.open_for_mins[day]}`, "HH:mm").format('h:mm a'));
         break;
 
       case "open_for_mins":
-        var temp = this.state.open_for_mins;
+        temp = this.state.open_for_mins;
         temp[day] = e.target.value;
         
-        this.setState({"open_for_mins": temp})
+        this.setState({"open_for_mins": temp});
+        this.props.handleChange(`hours.${day}.open_for`, moment(`${this.state.open_for_hours[day]}:${e.target.value}`, "HH:mm").format('h:mm a'));
         break;
     
       default:
@@ -281,9 +326,7 @@ class HoursTemplate extends Component {
     }    
   }
 
-  render() {
-    console.log(this.state);
-    
+  render() {    
     return (
       <div style={{ marginLeft: "7%", marginRight: "7%", marginTop: "1%" }}>
         <h4>Place Hours</h4>
@@ -292,7 +335,7 @@ class HoursTemplate extends Component {
         <br />
         {this.daysOfTheWeek.map((day, count) => {
           return (
-            <div>
+            <div  key={`${day}/${count}`}>
               <Row className="show-grid">
                 <Col
                   xs={2}
@@ -316,9 +359,9 @@ class HoursTemplate extends Component {
                       componentClass="select"
                       onChange={(e) => this.handleChange(e, "open_hours", count)}
                     >
-                      <option>{""}</option>
+                      <option>{this.state.open_hours[count]}</option>
                       {this.hours.map(hour => {
-                        return <option value={hour}>{hour}</option>;
+                        return <option key={`${count}/${hour}`} value={hour}>{hour}</option>;
                       })}
                     </FormControl>
                   </div>
@@ -330,9 +373,9 @@ class HoursTemplate extends Component {
                       componentClass="select"
                       onChange={(e) => this.handleChange(e, "open_mins", count)}
                     >
-                      <option>{""}</option>
+                      <option>{this.state.open_mins[count]}</option>
                       {this.mins.map(hour => {
-                        return <option value={hour}>{hour}</option>;
+                        return <option key={`${count}/${hour}`} value={hour}>{hour}</option>;
                       })}
                     </FormControl>
                   </div>
@@ -344,9 +387,9 @@ class HoursTemplate extends Component {
                       componentClass="select"
                       onChange={(e) => this.handleChange(e, "open_for_hours", count)}
                     >
-                      <option>{""}</option>
+                      <option>{this.state.open_for_hours[count]}</option>
                       {this.hours.map(hour => {
-                        return <option value={hour}>{hour}</option>;
+                        return <option key={`${count}/${hour}`} value={hour}>{hour}</option>;
                       })}
                     </FormControl>
                   </div>
@@ -358,9 +401,9 @@ class HoursTemplate extends Component {
                       componentClass="select"
                       onChange={(e) => this.handleChange(e, "open_for_mins", count)}
                     >
-                      <option>{""}</option>
+                      <option>{this.state.open_for_mins[count]}</option>
                       {this.mins.map(hour => {
-                        return <option value={hour}>{hour}</option>;
+                        return <option key={`${count}/${hour}`} value={hour}>{hour}</option>;
                       })}
                     </FormControl>
                   </div>

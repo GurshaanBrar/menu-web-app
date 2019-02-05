@@ -40,6 +40,7 @@ class Profile extends Component {
 
   handleSave() {
     this.setState({ show: false });
+    this.store.updateProfile(this.globalStore.placeId);
   }
 
   render() {
@@ -120,7 +121,7 @@ class Profile extends Component {
                           <b>Sunday</b>
                         </td>
                         <td>
-                          {pData.hours[0].opens} - {pData.hours[0].closes}
+                          {pData.formatted_hours[0].open} - {pData.formatted_hours[0].close}
                         </td>
                       </tr>
                       <tr>
@@ -128,7 +129,7 @@ class Profile extends Component {
                           <b>Monday</b>
                         </td>
                         <td>
-                          {pData.hours[1].opens} - {pData.hours[1].closes}
+                          {pData.formatted_hours[1].open} - {pData.formatted_hours[1].close}
                         </td>
                       </tr>
                       <tr>
@@ -136,7 +137,7 @@ class Profile extends Component {
                           <b>Tuesday</b>
                         </td>
                         <td>
-                          {pData.hours[2].opens} - {pData.hours[2].closes}
+                          {pData.formatted_hours[2].open} - {pData.formatted_hours[2].close}
                         </td>
                       </tr>
                       <tr>
@@ -144,7 +145,7 @@ class Profile extends Component {
                           <b>Wednesday</b>
                         </td>
                         <td>
-                          {pData.hours[3].opens} - {pData.hours[3].closes}
+                          {pData.formatted_hours[3].open} - {pData.formatted_hours[3].close}
                         </td>
                       </tr>
                       <tr>
@@ -152,7 +153,7 @@ class Profile extends Component {
                           <b>Thursday</b>
                         </td>
                         <td>
-                          {pData.hours[4].opens} - {pData.hours[4].closes}
+                          {pData.formatted_hours[4].open} - {pData.formatted_hours[4].close}
                         </td>
                       </tr>
                       <tr>
@@ -160,7 +161,7 @@ class Profile extends Component {
                           <b>Friday</b>
                         </td>
                         <td>
-                          {pData.hours[5].opens} - {pData.hours[5].closes}
+                          {pData.formatted_hours[5].open} - {pData.formatted_hours[5].close}
                         </td>
                       </tr>
                       <tr>
@@ -168,7 +169,7 @@ class Profile extends Component {
                           <b>Saturday</b>
                         </td>
                         <td>
-                          {pData.hours[6].opens} - {pData.hours[6].closes}
+                          {pData.formatted_hours[6].open} - {pData.formatted_hours[6].close}
                         </td>
                       </tr>
                     </tbody>
@@ -214,7 +215,10 @@ class Profile extends Component {
                     this.store.setProfileData(key, e.target.value)
                   }
                 />,
-                <HoursTemplate/>
+                <HoursTemplate
+                  times={pData.unformatted_hours}
+                  handleChange={(key, val) => this.store.setProfileData(key, val)}
+                />
               ]}
             />
           </div>

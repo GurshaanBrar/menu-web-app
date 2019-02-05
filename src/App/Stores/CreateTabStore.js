@@ -11,7 +11,18 @@ export class CreateTabStore {
   @observable menusTree = [];
   @observable profileSubStore = {
     loading: true,
-    profileData: {}
+    profileData: {},
+    DBUpdatedKeys: {
+      address: false,
+      cover_uri: false,
+      description: false,
+      hours: false,
+      icon_uri: false,
+      name: false,
+      phone_number: false,
+      tags: false,
+      website: false
+    }
   };
   @observable itemSubStore = {
     itemInView: ""
@@ -100,8 +111,9 @@ export class CreateTabStore {
       action("success", res => {
         if (res.exists) {
 
-          let tempRetObj = { hours: []};
+          let tempRetObj = { formatted_hours: []};
           let count = 0;
+
 
           for (let h of res.data().hours) {
 
@@ -145,16 +157,19 @@ export class CreateTabStore {
             }
 
             // insert object by day 0=sunday 6=sat
-            tempRetObj.hours[count] = {
-              opens: (moment(h.open, "HH:mm").format('h:mm a')),
-              closes: (moment(closeTime, "HH:mm").format('h:mm a'))
+            tempRetObj.formatted_hours[count] = {
+              open: (moment(h.open, "HH:mm").format('h:mm a')),
+              close: (moment(closeTime, "HH:mm").format('h:mm a'))
             }
   
             // increment count to next day
             count++;
           }
+
+          // copy unformatted hours to have the time open for available to components
+          let unformatted_hours = {"unformatted_hours": res.data().hours};
           
-          this.profileSubStore.profileData = { ...res.data(), ...tempRetObj};
+          this.profileSubStore.profileData = { ...res.data(), ...tempRetObj, ... unformatted_hours};
           this.profileSubStore.loading = false;
         }
       })
@@ -251,6 +266,34 @@ export class CreateTabStore {
     });
   }
 
+  // Writes to Profile Doc, if the key was changed using the web app then update it
+  // in firebase otherwise ignore it.
+  @action
+  updateProfile(placeId) {
+    let updateQueued = false;
+    let tempObj = {}
+
+    // only change the updated values
+    for(let k in this.profileSubStore.DBUpdatedKeys) {
+      if(this.profileSubStore.DBUpdatedKeys[`${k}`]) {
+        updateQueued = true;
+        if(k === "hours") {
+          tempObj[`${k}`] = this.profileSubStore.profileData.unformatted_hours;
+        }
+        else{
+          tempObj[`${k}`] = this.profileSubStore.profileData[`${k}`]
+        }
+      }
+    }
+
+    // update if necessary
+    if(updateQueued) {
+      RequestHandler.updateDocument("Places", placeId, tempObj).then(res => {
+        console.log("updated");
+      });
+    }
+  }
+
   /****** 3) Writes to local store ******/
 
   // Changes the item which will appear in modal
@@ -302,11 +345,59 @@ export class CreateTabStore {
     this.menusTree = retObj;
   }
 
+  // This sets profileData with certain key to the newVal, special care is taken when setting hours.
   @action
   setProfileData(key, newVal) {
-    this.profileSubStore.loading = true;
-    this.profileSubStore.profileData[`${key}`] = newVal;
-    this.profileSubStore.loading = false;
+    let keys = key.split(".")
+
+
+    // special cases need to be handled for the hours data, below will ensure data is properly set
+    if(keys[0] === "hours") {
+      if(keys[2] === "open_for") {
+        // split times into hours mins convert to number, get time string (am/pm)
+        let old_h = Number(this.profileSubStore.profileData.formatted_hours[`${keys[1]}`]['open'].split(":")[0]);
+        let old_m = Number(this.profileSubStore.profileData.formatted_hours[`${keys[1]}`]['open'].split(":")[1].split(" ")[0]);
+        let ampm = this.profileSubStore.profileData.formatted_hours[`${keys[1]}`]['open'].split(":")[1].split(" ")[1];
+        let add_h = Number(newVal.split(":")[0]);
+        let add_m = Number(newVal.split(":")[1].split(" ")[0]);
+        let add_ampm = newVal.split(":")[1].split(" ")[1];        
+
+        // convert to 24 hour time if larger then 12
+        if(old_h === 12 && ampm === "am") {
+          old_h = 0;
+        }
+        else if(ampm === "pm") {
+          old_h += 12;
+        }
+
+        if(add_h === 12 && add_ampm === "am") {
+          add_h = 0;
+        }
+        else if(add_ampm === "pm") {
+          add_h += 12;
+        }
+        
+        // update the local store the formated and unformatted hour for that day
+        this.profileSubStore.profileData.formatted_hours[`${keys[1]}`]["close"] = moment(`${old_h}:${old_m}`,"HH:mm").add(add_h, "h").add(add_m, "m").format('h:mm a');
+        this.profileSubStore.profileData.unformatted_hours[`${keys[1]}`][`${keys[2]}`] = `${add_h}:${add_m}`;
+      }
+      else {
+        // update the local store the formated and unformatted hour for that day
+        this.profileSubStore.profileData.formatted_hours[`${keys[1]}`][`${keys[2]}`] = newVal;
+        this.profileSubStore.profileData.unformatted_hours[`${keys[1]}`][`${keys[2]}`] = newVal.split(" ")[0];
+      }
+
+      // recorded that key has been updated
+      this.profileSubStore.DBUpdatedKeys.hours = true;
+    }
+    else {
+      this.profileSubStore.loading = true;
+      this.profileSubStore.profileData[`${key}`] = newVal;
+      this.profileSubStore.loading = false;
+
+      // recorded that key has been updated
+      this.profileSubStore.DBUpdatedKeys[`${key}`] = true;
+    }    
   }
 
   // This creates the listener for the menus doc,
