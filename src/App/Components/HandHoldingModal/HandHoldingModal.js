@@ -92,9 +92,9 @@ class HandHoldingModal extends Component {
           )}
           {this.state.pages.map((obj, count) => {
             if (this.state.pageInView >= count) {
-              return <div className="circleBase filled" />;
+              return <div key={count} className="circleBase filled" />;
             } else {
-              return <div className="circleBase" />;
+              return <div key={count} className="circleBase" />;
             }
           })}
           {this.state.pageInView >= this.state.pages.length - 1 ? (

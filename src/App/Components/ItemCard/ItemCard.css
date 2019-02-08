@@ -2,6 +2,7 @@
 .item-card-cont {
     position: relative;
 }
+
 .item-card-image { 
     object-fit: cover; 
     height: 250px;

@@ -251,6 +251,7 @@ class HoursTemplate extends Component {
     let temp_open_for_hours = [];
     let temp_open_for_mins = [];
 
+    // Add leading 0 when necessary
     for (let i = 0; i < 60; i++) {
       let stringHour = `${i}`;
                         
@@ -264,6 +265,7 @@ class HoursTemplate extends Component {
       this.mins.push(stringHour);
     }
 
+    // sort times from props
     for(let time of this.props.times) {
       let open = time.open.split(":");
       let open_for = time.open_for.split(":");
@@ -272,8 +274,7 @@ class HoursTemplate extends Component {
       temp_open_mins.push(open[1]);
       temp_open_for_hours.push(open_for[0]);
       temp_open_for_mins.push(open_for[1]);
-    }
-   
+    }  
 
     this.state = {
       open_hours: temp_open_hours,

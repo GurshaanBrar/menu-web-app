@@ -14,7 +14,8 @@ class Profile extends Component {
     this.state = {
       searchQuery: "",
       show: false, //hides and shows modal for items
-      menuSelected: false
+      menuSelected: false,
+      tempData: {}
     };
 
     this.store = this.props.CreateTabStore;
@@ -38,14 +39,31 @@ class Profile extends Component {
     this.setState({ show: true });
   }
 
-  handleSave() {
-    this.setState({ show: false });
+  // Triggered when modal reaches end and user clicks save
+  // writes to store and triggers write to db from store
+  handleSave() {   
+    // for all the keys update set the store with those updates
+    for(let key in this.state.tempData) {
+      this.store.setProfileData(key, this.state.tempData[`${key}`]);
+    }
+
+    // Update firebase
     this.store.updateProfile(this.globalStore.placeId);
+    this.setState({ show: false });
+  }
+
+  setTempData(key, value) {
+    let placeholder = this.state.tempData;
+
+    placeholder[`${key}`] = value;
+
+    this.setState({
+      tempData:placeholder
+    })
   }
 
   render() {
     var pData = this.store.profileSubStore.profileData;
-    console.log(pData);
     
     return (
       <div style={{ overflowY: "scroll", height: "100vh" }}>
@@ -194,30 +212,30 @@ class Profile extends Component {
                 <CoverImageTemplate
                   cover_uri={pData.cover_uri}
                   handleChange={e =>
-                    this.store.setProfileData("cover_uri", e.target.value)
+                    this.setTempData("cover_uri", e.target.value)
                   }
                 />,
                 <IconImageTemplate
                   icon_uri={pData.icon_uri}
                   handleChange={e =>
-                    this.store.setProfileData("icon_uri", e.target.value)
+                    this.setTempData("icon_uri", e.target.value)
                   }
                 />,
                 <DescriptionTemplate
                   value={pData.description}
                   handleChange={e =>
-                    this.store.setProfileData("description", e.target.value)
+                    this.setTempData("description", e.target.value)
                   }
                 />,
                 <DataTemplate
                   value={pData}
                   handleChange={(e, key) =>
-                    this.store.setProfileData(key, e.target.value)
+                    this.setTempData(key, e.target.value)
                   }
                 />,
                 <HoursTemplate
                   times={pData.unformatted_hours}
-                  handleChange={(key, val) => this.store.setProfileData(key, val)}
+                  handleChange={(key, val) => this.setTempData(key, val)}
                 />
               ]}
             />

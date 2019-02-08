@@ -397,7 +397,7 @@ export class CreateTabStore {
 
       // recorded that key has been updated
       this.profileSubStore.DBUpdatedKeys[`${key}`] = true;
-    }    
+    }        
   }
 
   // This creates the listener for the menus doc,
