@@ -14,14 +14,30 @@ class Menus extends Component {
   constructor(props) {
     super(props);
 
+    this.store = this.props.CreateTabStore;
+    this.globalStore = this.props.globalStore;
+      
+    let tempMenus = []
+    let stockImages = [
+      "https://www.stockvault.net/data/2010/11/24/116237/preview16.jpg",
+      "https://www.stockvault.net/data/2012/07/27/133058/preview16.jpg"
+    ]
+    let count = 0;
+
+    for(let m of this.store.menus) {
+      tempMenus.push({name: m, uri: stockImages[count]});
+      count++;
+    }
+
     this.state = {
       searchQuery: "",
       show: false, //hides and shows modal for items
-      menuSelected: false
+      menuSelected: false,
+      menus: tempMenus
     };
 
-    this.store = this.props.CreateTabStore;
-    this.globalStore = this.props.globalStore;
+    // sets the menu categories... useful in items modal when selecting new categories
+    this.store.setMenuCategories();
   }
 
   componentDidMount() {
@@ -56,6 +72,7 @@ class Menus extends Component {
   }
 
   render() {
+    
     return (
       <div>
         <Row className="show-grid">
@@ -112,11 +129,12 @@ class Menus extends Component {
                 marginLeft: "5%",
                 marginRight: "5%",
                 marginBottom: "1%",
-                marginTop: "1%"
+                marginTop: "1%",
+                cursor: "pointer"
               }}
             >
               <ItemsPreview
-                listOfItems={this.store.menuSubStore.menuTypes}
+                listOfItems={this.state.menus}
                 handleShow={this.handleMenuShow.bind(this)}
                 item={false}
               />
