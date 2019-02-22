@@ -101,11 +101,13 @@ class Menus extends Component {
               </div>
             )}
           </Col>
-          <Col xs={7} md={6} style={{ marginTop: "2%" }}>
-            <SearchBar
-              placeholder="search for Items"
-              onChange={val => this._handleSearch(val)}
-            />
+          <Col xs={7} md={6} style={{ textAlign: "center" }}>
+              {this.state.menuSelected ?
+                (
+                  <h2>{this.store.menuSubStore.menuInView}</h2>
+                ):
+                (<h2>Your Menu's</h2>)
+              }
           </Col>
           <Col xs={1} md={2} style={{ marginTop: "2%" }}>
             <div className="items-add-item" onClick={() => this.store.addCat()}>
