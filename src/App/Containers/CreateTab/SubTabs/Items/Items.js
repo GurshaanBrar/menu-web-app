@@ -1,3 +1,17 @@
+/*
+ *  Item.js
+ *
+ *  Description:
+ *      This class renders a places items from db and shows them in a pretty masonry view.
+ *      Users can search and view items here, as well as create new items and edit old
+ *      ones.
+ *
+ *  Sections:
+ *      1. CONSTRUCTOR
+ *      2. FUNCTIONS
+ *      3. RENDER
+ */
+
 import React, { Component } from "react";
 import { Row, Col } from "react-bootstrap";
 import { inject, observer } from "mobx-react";
@@ -11,24 +25,34 @@ import NewItemModal from "../../../../Components/NewItemModal/NewItemModal";
 @inject("globalStore")
 @observer
 class Items extends Component {
+    // ========== CONSTRUCTOR ========== //
+
     constructor(props) {
         super(props);
 
         this.state = {
-            searchQuery: "",
-            displayItems: this.props.CreateTabStore.items,
-            show: false,
-            newShow: false
+            displayItems: this.props.CreateTabStore.items, // Map items from store so that they can be mutated (on search)
+            show: false,                                   // Flag for old item modal
+            newShow: false                                 // Flag for new item modal
         };
 
         this.store = this.props.CreateTabStore;
         this.globalStore = this.props.globalStore;
-
-        // sets the menu categories... useful in items modal when selecting new categories
-        this.store.setMenuCategories();
     }
 
-    // updates the items in display
+    // ========== FUNCTIONS ========== //
+
+    // Des: Fetches items data
+    // Post: item data is updated in store
+    componentDidMount() {
+        console.log("Items.js did mount");
+        this.store.readItems(this.globalStore.placeId);
+    }
+
+    // Des: Updates the items in display to items with a name matching the
+    //      search query.
+    // Pre: query should be a string
+    // Post: local copy of items will be updated to match the query
     _handleSearch(query) {
         var list = this.store.items;
         var tempArr = [];
@@ -43,81 +67,91 @@ class Items extends Component {
         this.setState({ displayItems: tempArr });
     }
 
+    // Des: Closes both new and old item modals
+    // Post: All modals closed
     handleClose() {
         this.setState({ show: false, newShow: false });
     }
 
+    // Des: Shows old item modal, ensures new item modal is closed
+    // Post show is set to true and newShow is set to false
     handleShow() {
-        // set show to true to show modal
-        // set new show false to ensure newItem modal doesn't appear
         this.setState({ show: true, newShow: false });
     }
 
+    // Des: Shows new item modal, ensures old item modal is closed
+    // Post show is set to false and newShow is set to true
     newItemClickHandler = () => {
-        // set newShow to true to show modal
-        // set new show false to ensure item modal doesn't appear
         this.setState({ show: false, newShow: true });
     };
 
-    render() {
+    // ========== RENDER ========== //
+
+    render() {        
         return (
             <div style={{ overflowY: "scroll", height: "100vh" }}>
-                <Row className="show-grid">
-                    <Col xs={1} md={2}>
-                        {/* SPACING */}
-                    </Col>
-                    <Col xs={7} md={6} style={{ marginTop: "2%" }}>
-                        <SearchBar
-                            placeholder="search for Items"
-                            onChange={val => this._handleSearch(val)}
+                {this.store.itemSubStore.loading ? (
+                    <div>Loading...</div>
+                ) : (
+                    <div>
+                        <Row className="show-grid">
+                            <Col xs={1} md={2}>
+                                {/* SPACING */}
+                            </Col>
+                            <Col xs={7} md={6} style={{ marginTop: "2%" }}>
+                                <SearchBar
+                                    placeholder="search for Items"
+                                    onChange={val => this._handleSearch(val)}
+                                />
+                            </Col>
+                            <Col xs={1} md={2} style={{ marginTop: "2%" }}>
+                                <div
+                                    className="items-add-item"
+                                    onClick={() => this.newItemClickHandler()}
+                                >
+                                    <i
+                                        style={{ fontSize: 30 }}
+                                        className="fas fa-plus-circle"
+                                    />
+                                </div>
+                            </Col>
+                            <Col xs={1} md={2}>
+                                {/* SPACING */}
+                            </Col>
+                        </Row>
+                        <Row className="show-grid">
+                            <Col xs={12} md={12}>
+                                <div
+                                    style={{
+                                        marginLeft: "5%",
+                                        marginRight: "5%",
+                                        marginBottom: "1%",
+                                        marginTop: "1%"
+                                    }}
+                                >
+                                    <ItemsPreview
+                                        isItem={true}
+                                        listOfItems={this.state.displayItems}
+                                        handleShow={this.handleShow.bind(this)}
+                                    />
+                                </div>
+                            </Col>
+                        </Row>
+
+                        {/* modal is available to all components in container */}
+                        <ItemModal
+                            itemInView={this.store.itemSubStore.itemInView}
+                            handleClose={this.handleClose.bind(this)}
+                            show={this.state.show}
                         />
-                    </Col>
-                    <Col xs={1} md={2} style={{ marginTop: "2%" }}>
-                        <div
-                            className="items-add-item"
-                            onClick={() => this.newItemClickHandler()}
-                        >
-                            <i
-                                style={{ fontSize: 30 }}
-                                className="fas fa-plus-circle"
-                            />
-                        </div>
-                    </Col>
-                    <Col xs={1} md={2}>
-                        {/* SPACING */}
-                    </Col>
-                </Row>
-                <Row className="show-grid">
-                    <Col xs={12} md={12}>
-                        <div
-                            style={{
-                                marginLeft: "5%",
-                                marginRight: "5%",
-                                marginBottom: "1%",
-                                marginTop: "1%"
-                            }}
-                        >
-                            <ItemsPreview
-                                isItem = {true}
-                                listOfItems={this.state.displayItems}
-                                handleShow={this.handleShow.bind(this)}
-                            />
-                        </div>
-                    </Col>
-                </Row>
 
-                {/* modal is available to all components in container */}
-                <ItemModal
-                    itemInView={this.store.itemSubStore.itemInView}
-                    handleClose={this.handleClose.bind(this)}
-                    show={this.state.show}
-                />
-
-                <NewItemModal
-                    itemInView={this.store.itemSubStore.itemInView}
-                    handleClose={this.handleClose.bind(this)}
-                    show={this.state.newShow}
-                />
+                        <NewItemModal
+                            itemInView={this.store.itemSubStore.itemInView}
+                            handleClose={this.handleClose.bind(this)}
+                            show={this.state.newShow}
+                        />
+                    </div>
+                )}
             </div>
         );
     }
