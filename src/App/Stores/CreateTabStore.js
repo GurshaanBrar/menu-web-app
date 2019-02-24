@@ -6,12 +6,13 @@
  *      Menus.js, Profile.js), and handles read and write from firestore. To access firestore
  *      this store must be reference to preserve state, should look something like this to
  *      access firestore: Component -> Container -> Store -> firestore. This store has strict
- *      rules in terms of nomeclature... see each section for more details.
+ *      rules in terms of nomenclature... see each section for more details.
  *
  *  Sections:
  *      1. OBSERVABLES DECLARATION
  *      2. READS FROM DATABASE
  *      3. WRITES TO DATABASE
+ *      4. SETS OBSERVABLE
  */
 
 import { observable, action, toJS } from "mobx";
