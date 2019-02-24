@@ -60,19 +60,32 @@ class ItemModal extends Component {
                 this.props.itemInView.category,
                 this.state.editAreaValue
             );
-            this.setState({ editArea: "", editAreaValue: "" });
         } else {
             this.store.writeItems(
                 this.globalStore.placeId,
                 `${this.props.itemInView.breadcrumb}.${this.state.editArea}`,
                 this.state.editAreaValue
             );
-            this.setState({ editArea: "", editAreaValue: "" });
         }
         this.store.setItems(
-          `${this.props.itemInView.breadcrumb}.${this.state.editArea}`,
-          this.state.editAreaValue
-      );
+            `${this.props.itemInView.breadcrumb}.${this.state.editArea}`,
+            this.state.editAreaValue
+        );
+        
+        // Update both the formated catagories (the lanes, as well as the item in view)
+        // nessisarry so that each instance of item in view  ill have real time updates
+        var tempItemInView = {...this.props.itemInView};
+        tempItemInView[`${this.state.editArea}`] = this.state.editAreaValue;
+        
+        // update the correct item in view for the certain subtab
+        this.store.setItemInView(tempItemInView, this.props.tab);
+        
+        // only change the formatted lanes if parent is Menu.js
+        if(this.props.tab === "menu") {
+            this.store.setFormattedCategories();
+        }
+        
+        this.setState({ editArea: "", editAreaValue: "" });
     }
 
     // Triggered when cancel button is pressed

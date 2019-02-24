@@ -64,7 +64,7 @@ class Menus extends Component {
     //       menus board will be visible
     handleMenuShow() {
         // sorts items based on menuInView
-        this.store.setFormattedCatagories();
+        this.store.setFormattedCategories();
         this.setState({ menuSelected: true });
     }
 
@@ -138,7 +138,7 @@ class Menus extends Component {
                     <Col xs={1} md={2} style={{ marginTop: "2%" }}>
                         <div
                             className="items-add-item"
-                            onClick={() => this.store.addCat()}
+                            onClick={() => this.store.setFormattedCategories("add")}
                         >
                             <i
                                 style={{ fontSize: 30 }}
@@ -180,6 +180,7 @@ class Menus extends Component {
 
                 {/* modal is available to all components in container */}
                 <ItemModal
+                    tab="menu"
                     itemInView={this.store.menuSubStore.itemInView}
                     handleClose={this.handleClose.bind(this)}
                     show={this.state.show}

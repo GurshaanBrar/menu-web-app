@@ -2,7 +2,6 @@ import React from "react";
 import { Image } from "react-bootstrap";
 import PropTypes from "prop-types";
 import "./ItemCard.css";
-// import { isPlainObject } from 'mobx/lib/utils/utils';
 import { inject, observer } from "mobx-react";
 
 @inject("CreateTabStore")
@@ -37,9 +36,9 @@ class ItemCard extends React.Component {
 
       this.props.handleShow();
     }
-    else {
-      // change menu in view
-      this.store.setMenuInView("Food Menu")
+    else {    
+      // change menu in view to whatever menu was rendered      
+      this.store.setMenuInView(this.props.data.name);
       this.props.handleShow();
     }
   };

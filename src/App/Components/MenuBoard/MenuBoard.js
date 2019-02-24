@@ -22,8 +22,6 @@ class CustomLaneHeader extends Component {
     }
 
     clickHandler() {
-        console.log(this.state.editable);
-
         // set state only if it is not already being edited
         if (!this.state.editable) {
             this.setState({ editable: true });
@@ -116,6 +114,7 @@ class CustomCard extends Component {
             index: this.props.index,
             menu: this.props.menu
         };
+
         this.store.setItemInView(tempObj, "menu");
 
         this.props.handleShow();
@@ -180,6 +179,12 @@ export default class MenuBoard extends Component {
                         sourceLaneId,
                         targetLaneId
                     );
+                    console.log(cardDetails.breadcrumb+"category")
+                    this.store.setItems(
+                        `${cardDetails.breadcrumb}.category`,
+                        targetLaneId
+                    );
+                    this.store.setFormattedCategories();
                 }}
                 style={{ backgroundColor: "inherit" }}
             >

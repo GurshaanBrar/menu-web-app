@@ -1,10 +1,17 @@
 /*
- *  CreateTab.js
+ *  CreateTabStore.js
  *
  *  Description:
- *      This is the main route for the create tab
+ *      This class manages routing when on the create tab (~/console/create/<subTab>).
+ *      <subTab> can be one of the three values: items, profile, menus. Each render their
+ *      subsequent component.
  *
+ *  Sections:
+ *      1. CONSTRUCTOR
+ *      2. FUNCTIONS
+ *      3. RENDER
  */
+
 import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
 import "./CreateTab.css";
@@ -16,9 +23,12 @@ import Profile from "./SubTabs/Profile/Profile";
 @inject("CreateTabStore")
 @observer
 class CreateTab extends Component {
+    // ========== CONSTRUCTOR ========== //
+
     constructor(props) {
         super(props);
 
+        // grab the url of window
         this.state = {
             loc: this.props.location.pathname.split("/").pop()
         };
@@ -27,14 +37,18 @@ class CreateTab extends Component {
         this.store = this.props.CreateTabStore;
     }
 
-    componentDidMount() {
-        // this.store.setListener(this.globalStore.placeId); // Setup listener on Menus doc
-    }
+    // ========== FUNCTIONS ========== //
 
+    // Des: Runs when new props are passed down, in this case when sub location
+    //      is changed, ie <subTab>
+    // Post: location state variable will be updated with new subTab location,
+    //       if it is a valid subTab then its component will be rendered below
     componentWillReceiveProps(newProps) {
         // update location state
         this.setState({ loc: newProps.location.pathname.split("/").pop() });
     }
+
+    // ========== RENDER ========== //
 
     render() {
         var tempOffset = 64;
@@ -59,6 +73,6 @@ class CreateTab extends Component {
             </div>
         );
     }
-}
+};
 
 export default CreateTab;

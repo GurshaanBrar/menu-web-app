@@ -1,3 +1,19 @@
+/*
+ *  CreateTabStore.js
+ *
+ *  Description:
+ *      This class manages the state for the Create tab and its sub tabs (CreateTab.js, Item.js,
+ *      Menus.js, Profile.js), and handles read and write from firestore. To access firestore
+ *      this store must be reference to preserve state, should look something like this to
+ *      access firestore: Component -> Container -> Store -> firestore. This store has strict
+ *      rules in terms of nomeclature... see each section for more details.
+ *
+ *  Sections:
+ *      1. OBSERVABLES DECLARATION
+ *      2. READS FROM DATABASE
+ *      3. WRITES TO DATABASE
+ */
+
 import { observable, action, toJS } from "mobx";
 import RequestHandler from "../Services/RequestHandler";
 var moment = require("moment");
@@ -12,12 +28,13 @@ export class CreateTabStore {
      *  calling its setter function.
      */
 
+    //  Store for all tabs under CreateTab
     @observable items = []; // All items
     @observable menus = []; // list of menu names for a place
     @observable menuCategories = []; // List of categories for a menu
     @observable menusTree = []; // Preserves relationship between menus -> categories -> and items
 
-    // SubStore for Profile tab, mapped from PlaceData in db.
+    // SubStore for Profile tab, mapped from Places in db.
     @observable profileSubStore = {
         loading: true, // status of data fetch
         profileData: {}, // local cache of data from db
@@ -35,11 +52,13 @@ export class CreateTabStore {
         }
     };
 
+    // SubStore for Items tab, mapped from Menus in db.
     @observable itemSubStore = {
         loading: true,
         itemInView: ""
     };
 
+    // SubStore for Menus tab, mapped from Menus in db.
     @observable menuSubStore = {
         loading: true,
         itemInView: "",
@@ -49,7 +68,7 @@ export class CreateTabStore {
 
     // ==================== OBSERVABLES DECLARATION: END ==================== //
 
-    // ==================== READ FROM DATABASE: START ==================== //
+    // ==================== READS FROM DATABASE: START ==================== //
     /*
      *  These functions read from firestore, they do not mutate the db in any way,
      *  however some functions may mutate store observables. Each function should be
@@ -192,8 +211,9 @@ export class CreateTabStore {
                                 }
                             }
                         }
-                        this.itemSubStore.loading = false;
+
                         this.setMenuCategories();
+                        this.itemSubStore.loading = false;                        
                     } else {
                         console.log("menu does not exist");
                     }
@@ -204,7 +224,7 @@ export class CreateTabStore {
             });
     }
 
-    // ==================== READ FROM DATABASE: END ==================== //
+    // ==================== READS FROM DATABASE: END ==================== //
 
     // ==================== WRITES TO DATABASE: START ==================== //
     /*
@@ -278,7 +298,7 @@ export class CreateTabStore {
             });
     }
 
-    // Ref: ItemModal.js
+    // Ref: ItemModal.js & MenuBoard.js
     // Des: Moves item to a new category and writes update to firestore
     // Pre: men must be valid menu name, both oldCat and newCat must be valid
     //      category (string & exists), itemId must exist
@@ -310,6 +330,7 @@ export class CreateTabStore {
         });
     }
 
+    // Ref: MenuBoard.js
     // Des: Updates category names.grabs the menu in view from firestore then will do one of the two
     //      things. Will create new cat object with new name write it to database then
     //      deletes the old object (essentially replacing) /OR/ Will create new cat object and
@@ -349,9 +370,9 @@ export class CreateTabStore {
         });
     }
 
-    /* ==================== WRITES TO DATABASE: END ==================== */
+    // ==================== WRITES TO DATABASE: END ==================== //
 
-    /* ==================== SETS OBSERVABLES: START ==================== */
+    // ==================== SETS OBSERVABLES: START ==================== //
     /*
      *  These functions set store observables, they should never interact
      *  with firestore. Each function should camelCased and prefixed with
@@ -361,7 +382,7 @@ export class CreateTabStore {
      *      1. setItemInView()
      *      2. setProfileSubStore()
      *      3. setItems()
-     *      4. setFormattedCatagories()
+     *      4. setFormattedCategories()
      *      5. setMenuInView()
      *      6. setMenuCategories()
      *
@@ -374,8 +395,6 @@ export class CreateTabStore {
     // Post: the subStore's itemInView will be updated to newItem
     @action
     setItemInView(newItem, subStore) {
-        console.log("in", newItem);
-
         if (subStore === "item") {
             this.itemSubStore.itemInView = newItem;
         } else if (subStore === "menu") {
@@ -477,42 +496,63 @@ export class CreateTabStore {
             if (item.id === edited_id) {
                 item[`${edited_key}`] = newVal;
             }
-        }
-
-        // if the category is changed resort the items
-        if (edited_key === "category") {
-            this.sortItems();
-        }
+        };
     }
 
     // Ref: Menus.js
     // Des: Will sort all items belonging to the menuInView into there categories, specially
-    //      formatted for the menu boards.
-    // Pre: menusTree and menuCategories should not be empty (must be already sorted).
+    //      formatted for the menu boards. if action is add, new lane (category is added).
+    // Pre: if action != add, menusTree and menuCategories should not be empty (must be already sorted).
     //      menuInView in menuSubStore must also be set to a valid menu.
     // Post: menuSubStore's formattedCategories will be set to the formatted array of categories + items
+    //       if action is add then formatted catagories will have a new category.
     @action
-    setFormattedCatagories() {
-        let tempCats = [];
-        let menuName = this.menuSubStore.menuInView;
-
-        // make new lane for each known category
-        for (let m of toJS(this.menusTree[`${menuName}`])) {
-            tempCats.push({
-                id: m,
-                title: m,
+    setFormattedCategories(action = "") {
+        if (action === "add") {
+            this.menuSubStore.formattedCatagories.push({
+                id: "New Category",
+                title: "New Category",
                 cards: []
             });
-        }
+        } else {
+            let tempCats = []; // This will replace our formattedCatagories
+            let menuName = this.menuSubStore.menuInView; // The menu in views name
 
-        for (let i of toJS(this.items)) {
-            if (i.menu === menuName) {
-                let el0 = toJS(this.menuCategories).indexOf(i.category);
-                tempCats[`${el0}`].cards.push(i);
+            // make new lane for each known category
+            for (let m of toJS(this.menusTree[`${menuName}`])) {
+                tempCats.push({
+                    id: m,
+                    title: m,
+                    cards: []
+                });
             }
-        }
 
-        this.menuSubStore.formattedCatagories = tempCats;
+            // Move items to there lanes
+            for (let i of toJS(this.items)) {
+                // if it is the menu in view then format the card
+                if (i.menu === menuName) {
+                    let el0 = 0; // index of category
+                    let count = 0; // used to track element index
+
+                    // search for the index of the items category to push to temp cats
+                    for (let t of tempCats) {
+
+                        // if the category matches then return the index of the category
+                        if (t.id === i.category) {
+                            el0 = count;
+                            count = 0;
+                            break;
+                        }
+                        count++; //increment count
+                    }
+
+                    // push new card to the tempCats
+                    tempCats[`${el0}`].cards.push(i);
+                }
+            }
+
+            this.menuSubStore.formattedCatagories = tempCats;
+        }
     }
 
     // Ref: ItemCard.js
@@ -524,6 +564,7 @@ export class CreateTabStore {
         this.menuSubStore.menuInView = newMenuInView;
     }
 
+    // Ref: CreateTabStore.js (yes this class :D)
     // Des: Will sort all items into its tree, as well as record all
     //      categories encountered.
     // Pre: this.items should not be empty.
@@ -560,54 +601,7 @@ export class CreateTabStore {
         this.menusTree = retObj;
     }
 
-    /* ==================== SETS OBSERVABLES: END ==================== */
-
-    // Adds new category to local cache then writes new cat with items to firestore
-    @action
-    addCat() {
-        this.menuSubStore.formattedCatagories.push({
-            id: "New Category",
-            title: "New Category",
-            cards: []
-        });
-    }
+    // ==================== SETS OBSERVABLES: END ==================== //
 }
 
 export default new CreateTabStore();
-
-// const backup = {
-//   "Food Menu": {
-//     "BURGERS + SANDWICHES": {
-//       "ce8af52e-002e-11e9-8eb2-f2801f1b9fd1": {
-//         "description": "created by chef rob feenie. peking duck, roasted chicken, prosciutto di modena, pecan fruit bread",
-//         "name": "BBQ Duck Clubhouse",
-//         "price": 19,
-//         "uri": "https://i.pinimg.com/originals/ad/84/3b/ad843bde6e58f12e2a1dfe0af32569ab.jpg",
-//         "views": 10
-//       },
-//       "ce8af7e0-002e-11e9-8eb2-f2801f1b9fd1": {
-//         "description": "smashed certified angus beef®, sautéed mushrooms, aged cheddar, smoked bacon, red relish, mayonnaise, ketchup, mustard",
-//         "name": "The Feenie Burger",
-//         "price": 19,
-//         "uri": "https://noshandnibble.blog/content/images/2018/04/cactus-club-cafe-feenie-burger.jpg",
-//         "views": 2
-//       }
-//     },
-//     "DESSERTS": {
-//       "ce8af934-002e-11e9-8eb2-f2801f1b9fd1": {
-//         "description": "tahitian vanilla ice cream, caramel sauce, crunchy chocolate pearls",
-//         "name": "Chocolate Peanut Butter Crunch Bar",
-//         "price": 9.75,
-//         "uri": "https://s3.amazonaws.com/cdn.houseandhome.com/wp-content/uploads/Cake_CactusClubCafe_HH_AU11_0.jpg",
-//         "views": 22
-//       },
-//       "ce8afa7e-002e-11e9-8eb2-f2801f1b9fd1": {
-//         "description": "warm caramel foam, crunchy sponge toffee, velvety chocolate mousse",
-//         "name": "Caramel Chocolate Mousse",
-//         "price": 6.5,
-//         "uri": "https://thisbeautifuldayblog.com/wp-content/uploads/2015/10/Cactus-club-cafe-Toronto-Dessert-e1446056953433.jpg",
-//         "views": 5
-//       }
-//     }
-//   }
-// }

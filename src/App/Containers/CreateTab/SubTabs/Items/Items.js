@@ -31,9 +31,9 @@ class Items extends Component {
         super(props);
 
         this.state = {
-            displayItems: this.props.CreateTabStore.items, // Map items from store so that they can be mutated (on search)
-            show: false,                                   // Flag for old item modal
-            newShow: false                                 // Flag for new item modal
+            displayItems: [],    // Map items from store so that they can be mutated (on search)
+            show: false,         // Flag for old item modal
+            newShow: false,      // Flag for new item modal
         };
 
         this.store = this.props.CreateTabStore;
@@ -85,9 +85,17 @@ class Items extends Component {
         this.setState({ show: false, newShow: true });
     };
 
+    updateDisplayItems() {
+        this.setState({displayItems: this.store.items, hasLoaded: true})
+    }
+
     // ========== RENDER ========== //
 
-    render() {        
+    render() {      
+        // update displayItems every render, generally it is bad practice to 
+        // mutate state without setState but for this time its needed.
+        this.state.displayItems = this.store.items;
+
         return (
             <div style={{ overflowY: "scroll", height: "100vh" }}>
                 {this.store.itemSubStore.loading ? (
@@ -140,6 +148,7 @@ class Items extends Component {
 
                         {/* modal is available to all components in container */}
                         <ItemModal
+                            tab="item"
                             itemInView={this.store.itemSubStore.itemInView}
                             handleClose={this.handleClose.bind(this)}
                             show={this.state.show}
