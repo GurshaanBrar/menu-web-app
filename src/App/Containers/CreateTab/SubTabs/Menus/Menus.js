@@ -1,16 +1,16 @@
 /*
- *  Menus.js
- *
- *  Description:
- *      This class renders the menu board for a places menus. A user first sees all their menus, if they click
- *      one they are taken to that menus board, which shows the child parent relationship between categories
- *      and items.
- *
- *  Sections:
- *      1. CONSTRUCTOR
- *      2. FUNCTIONS
- *      3. RENDER
- */
+*  Menus.js
+*
+*  Description:
+*      This class renders the menu board for a places menus. A user first sees all their menus, if they click
+*      one they are taken to that menus board, which shows the child parent relationship between categories
+*      and items.
+*
+*  Sections:
+*      1. CONSTRUCTOR
+*      2. FUNCTIONS
+*      3. RENDER
+*/
 
 import React, { Component } from "react";
 import MenuBoard from "../../../../Components/MenuBoard/MenuBoard";
@@ -19,6 +19,9 @@ import { Row, Col } from "react-bootstrap";
 import ItemModal from "../../../../Components/ItemModal/ItemModal";
 import ItemsPreview from "../../../../Components/ItemsPreview/ItemsPreview";
 import FontAwesome from "react-fontawesome";
+import HandHoldingModal from '../../../../Components/HandHoldingModal/HandHoldingModal';
+import { NameAndPhoto, Categories, ItemAdder } from './ModalPages';
+import SearchBar from '../../../../Components/SearchBar/SearchBar';
 
 @inject("CreateTabStore")
 @inject("globalStore")
@@ -28,14 +31,15 @@ class Menus extends Component {
 
     constructor(props) {
         super(props);
+        this.state = {
+            searchQuery: "",
+            addMenu: false,
+            show: false, //hides and shows modal for items
+            menuSelected: false
+        };
 
         this.store = this.props.CreateTabStore;
         this.globalStore = this.props.globalStore;
-
-        this.state = {
-            show: false,         // hides and shows modal for items
-            menuSelected: false, // Flag if menu has be chosen, if false show all menus
-        };
     }
 
     // ========== FUNCTIONS ========== //
@@ -46,10 +50,27 @@ class Menus extends Component {
         console.log("Menus.js did mount");
         this.store.readItems(this.globalStore.placeId);
     }
+    _handleSearch(val) {
+        this.setState({ searchQuery: val });
+    }
+
+    //show add menu hand holder
+    handleShowNewMenu() {
+        this.setState({addMenu: true});
+        this.store.menuSubStore.isNewMenu = true;
+        // initialize new menu object in the store
+    }
+
+    //closes add menu hand holding
+    handleCloseNewMenu() {
+        this.setState({addMenu: false});
+        this.store.menuSubStore.isNewMenu = false;
+    }
 
     // Des: closes the item modal
     // Post: show is set to false, modal is closed
     handleClose() {
+        this.store.sortItems();
         this.setState({ show: false });
     }
 
@@ -75,7 +96,6 @@ class Menus extends Component {
     }
 
     // ========== RENDER ========== //
-
     render() {
         // if there is no menu selected (all menus are shown), map menus from store
         // and assign a random image to it.
@@ -92,102 +112,107 @@ class Menus extends Component {
                 count++;
             }
         }
-
         return (
-            <div>
+                <div>
                 <Row className="show-grid">
                     <Col xs={1} md={1}>
-                        {/* SPACING */}
+                    {/* SPACING */}
                     </Col>
                     <Col xs={1} md={2} style={{ marginTop: "2%" }}>
-                        {this.state.menuSelected ? (
-                            <div
-                                className="items-add-back"
-                                onClick={() => this._goback()}
-                            >
-                                <FontAwesome
-                                    className="arrow-alt-left"
-                                    name="arrow-left"
-                                    size="2x"
-                                    style={{
-                                        textShadow: "0 1px 0 rgba(0, 0, 0, 0.1)"
-                                    }}
-                                />
-                            </div>
-                        ) : (
-                            <div className="items-add">
-                                <FontAwesome
-                                    className="arrow-alt-left"
-                                    name="arrow-alt-left"
-                                    size="2x"
-                                    color="white"
-                                    style={{
-                                        textShadow: "0 1px 0 rgba(0, 0, 0, 0.1)"
-                                    }}
-                                />
-                            </div>
-                        )}
-                    </Col>
-                    <Col xs={7} md={6} style={{ textAlign: "center" }}>
-                        {this.state.menuSelected ? (
-                            <h2>{this.store.menuSubStore.menuInView}</h2>
-                        ) : (
-                            <h2>Your Menu's</h2>
-                        )}
-                    </Col>
-                    <Col xs={1} md={2} style={{ marginTop: "2%" }}>
-                        <div
-                            className="items-add-item"
-                            onClick={() => this.store.setFormattedCategories("add")}
-                        >
-                            <i
-                                style={{ fontSize: 30 }}
-                                className="fas fa-plus-circle"
-                            />
+                    {this.state.menuSelected ? (
+                        <div className="items-add-back" onClick={() => this._goback()}>
+                        <FontAwesome
+                            className="arrow-alt-left"
+                            name="arrow-left"
+                            size="2x"
+                            style={{ textShadow: "0 1px 0 rgba(0, 0, 0, 0.1)" }}
+                        />
                         </div>
+                    ) : (null)}
+                    </Col>
+                    <Col xs={7} md={6} style={{ marginTop: "2%" }}>
+                    <SearchBar
+                        placeholder="search for Items"
+                        onChange={val => this._handleSearch(val)}
+                    />
+                    </Col>
+                    <Col xs={1} md={2} style={{ marginTop: "2%" }}>
+                    {this.state.menuSelected ? (
+                    <div className="items-add-item" onClick={() => this.store.addCat()}>
+                        <i style={{ fontSize: 30 }} className="fas fa-plus-circle" />
+                    </div>
+                    ):(
+                    <div className="items-add-item" onClick={this.handleShowNewMenu.bind(this)}>
+                        <i style={{ fontSize: 30 }} className="fas fa-plus-circle" />
+                    </div>
+                    )
+                    }
                     </Col>
                     <Col xs={1} md={2}>
-                        {/* SPACING */}
+                    {/* SPACING */}
                     </Col>
                 </Row>
                 <Row className="show-grid">
                     {this.state.menuSelected ? (
-                        <Col xs={12} md={12}>
-                            <div style={{ margin: "2%" }}>
-                                <MenuBoard
-                                    handleShow={this.handleShow.bind(this)}
-                                />
-                            </div>
-                        </Col>
-                    ) : (
-                        <div
-                            style={{
-                                marginLeft: "5%",
-                                marginRight: "5%",
-                                marginBottom: "1%",
-                                marginTop: "1%",
-                                cursor: "pointer"
-                            }}
-                        >
-                            <ItemsPreview
-                                listOfItems={tempMenus}
-                                handleShow={this.handleMenuShow.bind(this)}
-                                item={false}
-                            />
+                    <Col xs={12} md={12}>
+                        <div style={{ margin: "2%" }}>
+                        <MenuBoard handleShow={this.handleShow.bind(this)} />
                         </div>
+                    </Col>
+                    ) : (
+                    <div
+                        style={{
+                            marginLeft: "5%",
+                            marginRight: "5%",
+                            marginBottom: "1%",
+                            marginTop: "1%"
+                        }}
+                    >
+                        <ItemsPreview
+                            listOfItems={tempMenus}
+                            handleShow={this.handleMenuShow.bind(this)}
+                            item={false}
+                        />
+                        <ItemsPreview
+                            listOfItems={this.store.menuSubStore.menuTypes}
+                            handleShow={this.handleMenuShow.bind(this)}
+                            item={false}
+                        />
+                    </div>
                     )}
                 </Row>
 
                 {/* modal is available to all components in container */}
                 <ItemModal
-                    tab="menu"
                     itemInView={this.store.menuSubStore.itemInView}
                     handleClose={this.handleClose.bind(this)}
                     show={this.state.show}
                 />
-            </div>
-        );
-    }
-}
 
+                <HandHoldingModal
+                    handleClose={this.handleCloseNewMenu.bind(this)}
+                    show={this.state.addMenu}
+                    title={'New Menu'}
+                    handleSave={() => {}}
+                    pages={[
+                    <NameAndPhoto 
+                        name={null}
+                        icon_uri={null}
+                        handleChangeName={e => this.store.setMenuData('name', e.target.value)}
+                        handleChangePhoto={e => this.store.setMenuData('uri', e.target.value)}
+                    />,
+                    <Categories 
+                        categories={this.store.menuSubStore.newMenuData.cats}
+                        handleChange={e => this.store.setMenuData('cats', e)}
+                    />,
+                    <ItemAdder
+                        categories={this.store.menuSubStore.newMenuData}
+
+                    />
+                    ]}
+                />
+                </div>
+            );
+        }
+}
 export default Menus;

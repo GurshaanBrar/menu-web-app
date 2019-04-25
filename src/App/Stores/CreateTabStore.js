@@ -63,7 +63,28 @@ export class CreateTabStore {
     loading: true,
     itemInView: "",
     menuInView: "",
-    formattedCatagories: []
+
+    formattedCatagories: [],
+
+    menuTypes: [
+      // {
+      //   name: "Lunch",
+      //   uri:
+      //     "https://www.ycdsb.ca/sms/wp-content/uploads/sites/90/2017/10/lunch-1200x1200.jpeg"
+      // },
+      // {
+      //   name: "Brunch",
+      //   uri:
+      //     "https://images-na.ssl-images-amazon.com/images/I/61n8O21K6vL._SX258_BO1,204,203,200_.jpg"
+      // },
+      // {
+      //   name: "Dinner",
+      //   uri:
+      //     "https://images-na.ssl-images-amazon.com/images/I/61O6jnlbiTL._SX258_BO1,204,203,200_.jpg"
+      // }
+    ],
+    isNewMenu: false,
+    newMenuData: {},
   };
 
   // ==================== OBSERVABLES DECLARATION: END ==================== //
@@ -287,6 +308,21 @@ export class CreateTabStore {
         console.log(`Error at writeItems() in CreateTabStore.js: ${err}`);
       });
   }
+  // Ref: HandHoldingModal.js
+  // Des: Updates Menu data with category id and title and items included
+  // Pre: Menu id must be valid
+  // Post: if succesful, menus document will be updated to have the new category and data
+  @action
+  addCat() {
+    this.menuSubStore.menuCats.push({
+      id: "New Category",
+      title: "New Category",
+      cards: []
+    });
+
+    // TODO: make a call to firebase to add the new category
+    // but invole the handholding model for the best category
+  }
 
   // Ref: ItemModal.js & MenuBoard.js
   // Des: Moves item to a new category and writes update to firestore
@@ -507,6 +543,27 @@ export class CreateTabStore {
   //      and the 4(el 3) string being the name of the key to edit. EX: "Food Menu.Deserts.4a4f4380-0c01-11e9-a3e5-cd6beef52e09.name"
   //      value must match key required formatting
   // Post: Then path in this local store will be updated to newVal
+  // updates the correspodning fields to a new menu in the subStore
+  @action
+  setMenuData(key, newVal){
+    if(key === 'cats'){
+      if(this.menuSubStore.newMenuData[`${key}`]){
+        this.menuSubStore.newMenuData[`${key}`].push(newVal);
+      }else {
+        this.menuSubStore.newMenuData[`${key}`] = [newVal]
+      }
+    }else{
+      this.menuSubStore.loading = true;
+      this.menuSubStore.newMenuData[`${key}`] = newVal;
+      this.menuSubStore.loading = false;
+    }
+
+      // recorded that key has been updated
+      // this.profileSubStore.DBUpdatedKeys[`${key}`] = true;
+  }
+
+  // This creates the listener for the menus doc,
+  // If the document changes, the local values will be updated to mach the db
   @action
   setItems(path, newVal) {
     let edited_id = path.split(".")[2];
