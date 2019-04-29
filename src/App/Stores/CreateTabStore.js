@@ -277,7 +277,7 @@ export class CreateTabStore {
         }
     }
 
-    // Ref: ItemModal.js
+    // Ref: ItemModal.js, Item.js
     // Des: Updates the element with placeId and path to newVal.
     // Pre: placeId and path must be valid (exists in db) and string format,
     //      newVal should follow the format of its key.
@@ -482,22 +482,30 @@ export class CreateTabStore {
         }
     }
 
-    // Ref: ItemModal.js
-    // Des: This updates this.items key with the given path to the newVal
+    // Ref: ItemModal.js, Items.js
+    // Des: This updates this.items key with the given path to the newVal, or pushes new item to front of items
     // Pre: path must be formatted as a period separated string, with the 3(el 2) string being the uuid of the item
     //      and the 4(el 3) string being the name of the key to edit. EX: "Food Menu.Deserts.4a4f4380-0c01-11e9-a3e5-cd6beef52e09.name"
     //      value must match key required formatting
-    // Post: Then path in this local store will be updated to newVal
+    // Post: Then path in this local store will be updated to newVal, or the new item new Val will be added
     @action
     setItems(path, newVal) {
+        let edited = false; // flag to see if it has been changed
         let edited_id = path.split(".")[2];
         let edited_key = path.split(".")[3];
 
         for (let item of this.items) {
             if (item.id === edited_id) {
                 item[`${edited_key}`] = newVal;
+                edited = true;
             }
         };
+
+        if(!edited) {
+            // pushes item to the front of the array so that 
+            // users sea it first
+            this.items.unshift(newVal);
+        }
     }
 
     // Ref: Menus.js

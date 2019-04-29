@@ -19,7 +19,14 @@ import SearchBar from "../../../../Components/SearchBar/SearchBar";
 import ItemsPreview from "../../../../Components/ItemsPreview/ItemsPreview";
 import ItemModal from "../../../../Components/ItemModal/ItemModal";
 import "./Items.css";
-import NewItemModal from "../../../../Components/NewItemModal/NewItemModal";
+import HandHoldingModal from "../../../../Components/HandHoldingModal/HandHoldingModal";
+import {
+    ItemImageTemplate,
+    MenuCatTemplate,
+    DataTemplate
+} from "./ModalTemplates"; 
+
+const uuidv1 = require("uuid/v1");
 
 @inject("CreateTabStore")
 @inject("globalStore")
@@ -34,6 +41,7 @@ class Items extends Component {
             displayItems: [],    // Map items from store so that they can be mutated (on search)
             show: false,         // Flag for old item modal
             newShow: false,      // Flag for new item modal
+            tempData: {}         // Temp data for new Item modal
         };
 
         this.store = this.props.CreateTabStore;
@@ -89,12 +97,60 @@ class Items extends Component {
         this.setState({displayItems: this.store.items, hasLoaded: true})
     }
 
+    // Des: Sets the key in tempData to the new value
+    // Pre: key must be string, value should be correct type for key
+    // Post: states tempData will be updated with new key/value
+    setTempData(key, value) {
+        let placeholder = this.state.tempData;
+
+        placeholder[`${key}`] = value;
+
+        this.setState({
+            tempData: placeholder
+        });
+    }
+
+    // Des: Triggered when modal reaches end and user clicks save
+    //      writes to store and triggers write to db from store
+    // Post: Store and firebase are updated with the new Key/Values
+    handleSave() {
+        let validInput = true; // maybe for some future form validation
+
+        if (validInput) {
+            let newItemId = uuidv1();
+            let submitObj = {
+                name: this.state.tempData.name,
+                uri: this.state.tempData.uri,
+                description: this.state.tempData.description,
+                price: Number(this.state.tempData.price),
+                views: 0
+            };
+
+            // write to database then update local display copy so we 
+            // dont need to refresh
+            this.store.writeItems(
+                this.globalStore.placeId,
+                `${this.state.tempData.menuPath}.${newItemId}`,
+                submitObj
+            );
+            this.store.setItems(
+                `${this.state.tempData.menuPath}.${newItemId}`,
+                submitObj
+            );
+            
+            // Close modal
+            this.setState({newShow: false});
+        } else {
+            console.log("err");
+        }
+    }
+
     // ========== RENDER ========== //
 
     render() {      
         // update displayItems every render, generally it is bad practice to 
-        // mutate state without setState but for this time its needed.
-        this.state.displayItems = this.store.items;
+        // mutate state without setState but for this time its needed.        
+        this.state.displayItems = this.store.items;        
 
         return (
             <div style={{ overflowY: "scroll", height: "100vh" }}>
@@ -154,11 +210,31 @@ class Items extends Component {
                             show={this.state.show}
                         />
 
-                        <NewItemModal
+                        {/* <NewItemModal
                             itemInView={this.store.itemSubStore.itemInView}
                             handleClose={this.handleClose.bind(this)}
                             show={this.state.newShow}
-                        />
+                        /> */}
+                          {/* modal is available to all components in container */}
+                          <HandHoldingModal
+                            handleClose={this.handleClose.bind(this)}
+                            show={this.state.newShow}
+                            title={"New Item"}
+                            handleSave={() => this.handleSave()}
+                            pages={[
+                                <ItemImageTemplate
+                                    handleChange={e => {this.setTempData("uri", e.target.value)} }
+                                />,
+                                <DataTemplate
+                                    handleChange={(e, key) =>
+                                        this.setTempData(key, e.target.value)
+                                    }
+                                />,
+                                <MenuCatTemplate
+                                    tree={this.store.menusTree}
+                                    handleChange={path => this.setTempData("menuPath", path)}
+                                />
+                            ]}/>
                     </div>
                 )}
             </div>

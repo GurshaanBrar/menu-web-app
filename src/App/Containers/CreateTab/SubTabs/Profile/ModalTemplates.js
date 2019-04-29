@@ -179,7 +179,7 @@ class DataTemplate extends Component {
             <FormControl
               type="text"
               value={this.state.name}
-              placeholder="Enter address."
+              placeholder="Enter name."
               onChange={e => this.changeName(e)}
             />
           </Col>
