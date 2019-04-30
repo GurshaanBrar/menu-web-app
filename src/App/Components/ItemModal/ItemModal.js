@@ -1,4 +1,9 @@
-// External
+/*
+ *  ItemModal.js
+ *
+ *  Description:
+ *
+ */
 import React, { Component } from "react";
 import { Modal, Image, FormControl, Button } from "react-bootstrap";
 import { Row, Col } from "react-bootstrap";
@@ -51,7 +56,7 @@ class ItemModal extends Component {
   }
 
   // triggered when save button is pressed
-  _handleSubmit() {      
+  _handleSubmit() {
     this.store.writeItems(
       this.globalStore.placeId,
       `${this.props.itemInView.id}.${this.state.editArea}`,
@@ -70,12 +75,6 @@ class ItemModal extends Component {
 
     // update the correct item in view for the certain subtab
     this.store.setItemInView(tempItemInView, this.props.tab);
-
-    // // only change the formatted lanes if parent is Menu.js
-    // if (this.props.tab === "menu") {
-    //   this.store.setFormattedCategories();
-    // }
-
     this.setState({ editArea: "", editAreaValue: "" });
   }
 
@@ -134,43 +133,6 @@ class ItemModal extends Component {
         <Button onClick={this._handleCancel.bind(this)}>Cancel</Button>
       </div>
     );
-
-    // const editor_dropdown = (
-    //     <div>
-    //         <FormControl
-    //             componentClass="select"
-    //             onChange={this.handleChange.bind(this)}
-    //         >
-    //             {this.props.itemInView !== "" ? (
-    //                 this.store.menusTree[
-    //                     `${this.props.itemInView.menu}`
-    //                 ].map((el, count) => {
-    //                     if (this.props.itemInView.category === el) {
-    //                         return (
-    //                             <option
-    //                                 key={`${el}${count}`}
-    //                                 selected
-    //                                 value={el}
-    //                             >
-    //                                 {el}
-    //                             </option>
-    //                         );
-    //                     } else {
-    //                         return (
-    //                             <option key={`${el}${count}`} value={el}>
-    //                                 {el}
-    //                             </option>
-    //                         );
-    //                     }
-    //                 })
-    //             ) : (
-    //                 <option value="select">select (multiple)</option>
-    //             )}
-    //         </FormControl>
-    //         <Button onClick={this._handleSubmit.bind(this)}>Save</Button>
-    //         <Button onClick={this._handleCancel.bind(this)}>Cancel</Button>
-    //     </div>
-    // );
 
     return (
       <Modal
@@ -265,73 +227,13 @@ class ItemModal extends Component {
                 </Row>
               </div>
               <hr />
-
-              {/* <a
-                                onClick={e =>
-                                    this._handleClick(
-                                        e,
-                                        this.props.itemInView.uri
-                                    )
-                                }
-                                className="items-preview-custom-atag"
-                            >
-                                <Row>
-                                    <Col xs={9} md={10}>
-                                        URI
-                                    </Col>
-                                    <Col xs={3} md={2}>
-                                        <i className={this.editIcon} />
-                                    </Col>
-                                </Row>
-                            </a>
-                            <div style={{ paddingTop: "4%" }}>
-                                <Row>
-                                    <Col md={12}>
-                                        {this.state.editArea === "uri" ? (
-                                            editor_textarea
-                                        ) : (
-                                            <a
-                                                style={{
-                                                    overflowWrap: "break-word"
-                                                }}
-                                                href={this.props.itemInView.uri}
-                                            >
-                                                {this.props.itemInView.uri}
-                                            </a>
-                                        )}
-                                    </Col>
-                                </Row>
-                            </div>
-                            <hr /> */}
-
-              {/* <a
-                                onClick={e => this._handleClick(e)}
-                                className="items-preview-custom-atag"
-                            >
-                                <Row>
-                                    <Col xs={9} md={10}>
-                                        Category
-                                    </Col>
-                                    <Col xs={3} md={2}>
-                                        <i className={this.editIcon} />
-                                    </Col>
-                                </Row>
-                            </a>
-                            <div style={{ paddingTop: "4%" }}>
-                                <Row>
-                                    <Col md={12}>
-                                        {this.state.editArea === "category" ? (
-                                            editor_dropdown
-                                        ) : (
-                                            <div>
-                                                {this.props.itemInView.menu} -{" "}
-                                                {this.props.itemInView.category}
-                                            </div>
-                                        )}
-                                    </Col>
-                                </Row>
-                            </div>
-                            <hr /> */}
+              <Button
+                onClick={() => this.props._handleDelete()}
+                bsStyle="danger"
+                style={{ marginLeft: "2%" }}
+              >
+                Delete
+              </Button>
             </Col>
           </Row>
         </Modal.Body>

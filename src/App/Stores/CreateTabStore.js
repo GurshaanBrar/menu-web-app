@@ -9,10 +9,11 @@
  *      rules in terms of nomenclature... see each section for more details.
  *
  *  Sections:
- *      1. SETS OBSERVABLE
- *      2. READS FROM DATABASE
- *      3. WRITES TO DATABASE
- *      4. OBSERVABLES DECLARATION
+ *      1. OBSERVABLES DECLARATION
+ *      2. SETS OBSERVABLE
+ *      3. READS FROM DATABASE
+ *      4. WRITES TO DATABASE
+ *      5. DELETES
  */
 
 import { observable, action, toJS } from "mobx";
@@ -175,23 +176,30 @@ export class CreateTabStore {
     }
   }
 
-  // Ref: ItemModal.js
-  // Des: This updates this.items key with the given path to the newVal
+  // Ref: ItemModal.js & Items.js
+  // Des: This updates this.items key with the given path to the newVal or adds a new item to items array
   // Pre: path must be formatted as a period separated string, with the 1st(el 0) string being the uuid of the item
   //      and the 2nd(el 1) string being the name of the key to edit. EX: "4a4f4380-0c01-11e9-a3e5-cd6beef52e09.name"
-  //      value must match key required formatting
-  // Post: Then path in this local store will be updated to newVal
+  //      value must match key required formatting, if action === 'add', then the newVal is appended to this.items
+  // Post: Then path in this local store will be updated to newVal, returns promise with success bool.
   @action
-  setItems(path, newVal) {
-    let edited_id = path.split(".")[0];  // item id
-    let edited_key = path.split(".")[1]; // edited key
+  setItems(path, newVal, action) {
+    return new Promise((resolve, reject) => {
+      let edited_id = path.split(".")[0]; // item id
+      let edited_key = path.split(".")[1]; // edited key
 
-    // search array for item with same id, edit that item
-    for (let item of this.items) {
-      if (item.id === edited_id) {
-        item[`${edited_key}`] = newVal;
+      if (action === "add") {
+        this.items.push(newVal);
+      } else {
+        // search array for item with same id, edit that item
+        for (let item of this.items) {
+          if (item.id === edited_id) {
+            item[`${edited_key}`] = newVal;
+          }
+        }
       }
-    }
+      resolve(true);
+    });
   }
 
   // Ref: Menus.js
@@ -479,7 +487,7 @@ export class CreateTabStore {
     //format object to update store with
     let tempObj = {};
     tempObj[path] = newVal;
-    
+
     RequestHandler.updateDocument("Items", placeId, tempObj)
       .then(res => {
         console.log("Items updated");
@@ -589,8 +597,54 @@ export class CreateTabStore {
       }
     });
   }
-
   // ==================== WRITES TO DATABASE: END ==================== //
+
+  // ==================== DELETES: START ==================== //
+  /*
+   *  These functions deletes objects first from the database then from the local
+   *  cache.
+   *
+   *  Contents:
+   *      1. deleteItem()
+   *
+   */
+
+  // Ref: Items.js
+  // Des: Will delete an item with the delKey from db and local cache
+  // Pre: placeId must exist in the Items collection, delKey must also exist
+  // Post: the item with delKey will be removed from firestore and local cache returns promise
+  //       with status (bool) so that you can make changes after this function has run.
+  @action
+  deleteItem(placeId, delKey) {
+    return new Promise(resolve => {
+      // Delete delKey from firebase
+      RequestHandler.deleteKey("Items", placeId, delKey)
+        .then(
+          action("success", res => {
+            // If successful continue by removing item from local cache
+            let tempItems = [];
+
+            // copies all items except the delKey
+            for (let item of this.items) {
+              if (item.id !== delKey) {
+                tempItems.push(item);
+              }
+            }
+
+            // reset items
+            this.items = [];
+            this.items = tempItems;
+
+            // resolve function status
+            resolve(true);
+          })
+        )
+        .catch(err => {
+          console.log("err");
+        });
+    });
+  }
+  // ==================== DELETES: END ==================== //
 }
 
 export default new CreateTabStore();
