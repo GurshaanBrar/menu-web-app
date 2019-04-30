@@ -34,6 +34,7 @@ class Items extends Component {
             displayItems: [],    // Map items from store so that they can be mutated (on search)
             show: false,         // Flag for old item modal
             newShow: false,      // Flag for new item modal
+            hasLoaded: false
         };
 
         this.store = this.props.CreateTabStore;
@@ -59,7 +60,7 @@ class Items extends Component {
 
         // checks if i.name includes the query
         for (let i of list) {
-            if (i.name.toLowerCase().includes(query.trim().toLowerCase())) {
+            if (i.name.toLowerCase().includes(query.trim().toLowerCase())) {               
                 tempArr.push(i);
             }
         }
@@ -85,6 +86,7 @@ class Items extends Component {
         this.setState({ show: false, newShow: true });
     };
 
+    // 
     updateDisplayItems() {
         this.setState({displayItems: this.store.items, hasLoaded: true})
     }
@@ -92,9 +94,10 @@ class Items extends Component {
     // ========== RENDER ========== //
 
     render() {      
-        // update displayItems every render, generally it is bad practice to 
-        // mutate state without setState but for this time its needed.
-        this.state.displayItems = this.store.items;
+        // updates display items if it has not already loaded and if ready to load
+        if(!this.state.hasLoaded && !this.store.itemSubStore.loading ) {
+            this.updateDisplayItems()
+        }
 
         return (
             <div style={{ overflowY: "scroll", height: "100vh" }}>
@@ -108,7 +111,7 @@ class Items extends Component {
                             </Col>
                             <Col xs={7} md={6} style={{ marginTop: "2%" }}>
                                 <SearchBar
-                                    placeholder="search for Items"
+                                    placeholder="Search for items by name"
                                     onChange={val => this._handleSearch(val)}
                                 />
                             </Col>

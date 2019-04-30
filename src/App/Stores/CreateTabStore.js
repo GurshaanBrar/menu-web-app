@@ -9,10 +9,10 @@
  *      rules in terms of nomenclature... see each section for more details.
  *
  *  Sections:
- *      1. OBSERVABLES DECLARATION
+ *      1. SETS OBSERVABLE
  *      2. READS FROM DATABASE
  *      3. WRITES TO DATABASE
- *      4. SETS OBSERVABLE
+ *      4. OBSERVABLES DECLARATION
  */
 
 import { observable, action, toJS } from "mobx";
@@ -34,12 +34,12 @@ export class CreateTabStore {
   @observable menus = []; // list of menu names for a place
   @observable menuCategories = []; // List of categories for a menu
   @observable menusTree = []; // Preserves relationship between menus -> categories -> and items
-
   // SubStore for Profile tab, mapped from Places in db.
   @observable profileSubStore = {
     loading: true, // status of data fetch
     profileData: {}, // local cache of data from db
-    DBUpdatedKeys: {     // tracks the keys updated
+    DBUpdatedKeys: {
+      // tracks the keys updated
       address: false,
       cover_uri: false,
       description: false,
@@ -54,6 +54,7 @@ export class CreateTabStore {
 
   // SubStore for Items tab, mapped from Menus in db.
   @observable itemSubStore = {
+    items: [],
     loading: true,
     itemInView: ""
   };
@@ -65,334 +66,7 @@ export class CreateTabStore {
     menuInView: "",
     formattedCatagories: []
   };
-
   // ==================== OBSERVABLES DECLARATION: END ==================== //
-
-  // ==================== READS FROM DATABASE: START ==================== //
-  /*
-   *  These functions read from firestore, they do not mutate the db in any way,
-   *  however some functions may mutate store observables. Each function should be
-   *  camelCased and prefixed with 'read'.
-   *
-   *  Contents:
-   *      1. readPlaces()
-   *      2. readItems()
-   *
-   */
-
-  // Ref: Profile.js
-  // Des: This function grabs all the info for place with placeId and converts database time
-  //      to human readable time.
-  // Pre: PlaceId must be valid (exist in db)
-  // Post: profileSubStore will be updated with new data, with formatted hours.
-  @action
-  readPlaces(placeId) {
-    RequestHandler.getDocument("Places", placeId).then(
-      action("success", res => {
-        if (res.exists) {
-          let tempRetObj = { formatted_hours: [] };
-          let count = 0;
-
-          for (let h of res.data().hours) {
-            // split time into hours and mins and convert to number
-            var openHour = Number(h.open.split(":")[0]);
-            var openMin = Number(h.open.split(":")[1]);
-            var openForHour = Number(h.open_for.split(":")[0]);
-            var openForMin = Number(h.open_for.split(":")[1]);
-            var closeTime = "23:00"; //the one and only close time :)
-            var minSum = openMin + openForMin;
-            var offset = 0;
-
-            // when added openForMin+openMin can be >= 60 which is invalid, this will reset the mins and add one to hour
-            if (minSum >= 60) {
-              openForMin = minSum - 60;
-              offset = 1;
-            }
-
-            // convert to decimal time representation (. instead of :)
-            var closeDec = offset + openHour + openForHour + openForMin / 100;
-
-            // format the close time if its not correct
-            if (closeDec >= 24) {
-              var tempHour = openHour + openForHour - 24;
-              var tempMin = openForMin;
-
-              if (tempHour === 0) {
-                tempHour = "00";
-                tempMin = "00";
-              } else {
-                if (tempHour < 10) {
-                  tempHour = `0${tempHour}`;
-                }
-                if (tempMin < 10) {
-                  tempMin = `0${tempMin}`;
-                }
-              }
-
-              closeTime = `${tempHour}:${tempMin}`;
-            }
-
-            // insert object by day 0=sunday 6=sat
-            tempRetObj.formatted_hours[count] = {
-              open: moment(h.open, "HH:mm").format("h:mm a"),
-              close: moment(closeTime, "HH:mm").format("h:mm a")
-            };
-
-            // increment count to next day
-            count++;
-          }
-
-          // copy unformatted hours to have the time open for available to components
-          let unformatted_hours = {
-            unformatted_hours: res.data().hours
-          };
-
-          this.profileSubStore.profileData = {
-            ...res.data(),
-            ...tempRetObj,
-            ...unformatted_hours
-          };
-
-          this.profileSubStore.loading = false;
-        }
-      })
-    );
-  }
-
-  // Ref: Items.js & Menus.js
-  // Des: Grabs all items from MenuData document in firestore, and maps it to local
-  //      formated array of items. function then calls this.setMenuCategories(); to build
-  //      tree relationship between menus categories and items
-  // Pre: placeId must be valid.
-  // Post: this.menus will be updated with all the menu names, this.items will contained an
-  //       unorganized array of items, and setMenuCategories will be ran (see function
-  //       declaration for more details).
-  @action
-  readItems(placeId) {
-    // clear array to push to
-    this.menus = [];
-    this.items = [];
-
-    RequestHandler.getDocument("Menus", placeId)
-      .then(
-        action("success", res => {
-          if (res.exists) {
-            // map data() to local var
-            let data = res.data();
-
-            // itr menus
-            for (let menu in data) {
-              this.menus.push(menu);
-
-              // itr categories in menu
-              for (var cat in data[`${menu}`]) {
-                // itr items in menu category
-                for (let item in data[`${menu}`][`${cat}`]) {
-                  if (item !== "type_description") {
-                    // format response
-                    let itemData = data[`${menu}`][`${cat}`][`${item}`];
-                    let tempObj = {
-                      id: item,
-                      menu: menu,
-                      category: cat,
-                      breadcrumb: `${menu}.${cat}.${item}`
-                    };
-                    let retObj = {
-                      ...tempObj,
-                      ...itemData
-                    };
-
-                    this.items.push(retObj);
-                  }
-                }
-              }
-            }
-
-            this.setMenuCategories();
-            this.itemSubStore.loading = false;
-          } else {
-            console.log("menu does not exist");
-          }
-        })
-      )
-      .catch(err => {
-        console.log(`Catched at CreateTabStore, readItems(): ${err}`);
-      });
-  }
-
-  // ==================== READS FROM DATABASE: END ==================== //
-
-  // ==================== WRITES TO DATABASE: START ==================== //
-  /*
-   *  These functions write to firestore. Each function should be
-   *  camelCased and prefixed with 'write'.
-   *
-   *  Contents:
-   *      1. writePlaces()
-   *      2. writeItems()
-   *      3. writeItemCategory()
-   *      4. writeNewCategoryName()
-   *      5. writeMenus()
-   */
-
-  // Ref: Profile.js
-  // Des: Writes the edited data to firebase
-  // Pre: placeId must be valid & exist
-  // Post: For the keys updated, controlled by DBUpdateKeys, firebase will
-  //       be updated with the new key/value pairs.
-  @action
-  writePlaces(placeId) {
-    let updateQueued = false;
-    let tempObj = {};
-
-    // only change the updated values
-    for (let k in this.profileSubStore.DBUpdatedKeys) {
-      if (this.profileSubStore.DBUpdatedKeys[`${k}`]) {
-        if (k === "hours") {
-          tempObj[`${k}`] = this.profileSubStore.profileData.unformatted_hours;
-        } else {
-          tempObj[`${k}`] = this.profileSubStore.profileData[`${k}`];
-        }
-
-        // reset flag, trigger update
-        this.profileSubStore.DBUpdatedKeys[`${k}`] = false;
-        updateQueued = true;
-      }
-    }
-
-    // update if necessary
-    if (updateQueued) {
-      RequestHandler.updateDocument("Places", placeId, tempObj).then(res => {
-        console.log("updated");
-      });
-    }
-  }
-
-  // Ref: ItemModal.js
-  // Des: Updates the element with placeId and path to newVal.
-  // Pre: placeId and path must be valid (exists in db) and string format,
-  //      newVal should follow the format of its key.
-  // Post: if successful, menus document will be updated, otherwise error will be caught
-  @action
-  writeItems(placeId, path, newVal) {
-    //format object to update store with
-    let tempObj = {};
-    tempObj[path] = newVal;
-
-    RequestHandler.updateDocument("Menus", placeId, tempObj)
-      .then(res => {
-        console.log("updated");
-      })
-      .catch(err => {
-        console.log(`Error at writeItems() in CreateTabStore.js: ${err}`);
-      });
-  }
-
-  // Ref: ItemModal.js & MenuBoard.js
-  // Des: Moves item to a new category and writes update to firestore
-  // Pre: men must be valid menu name, both oldCat and newCat must be valid
-  //      category (string & exists), itemId must exist
-  // Post: Firestore will be updated with the new categories & items
-  @action
-  writeItemCategory(placeId, men, itemId, oldCat, newCat) {
-    RequestHandler.getDocument("Menus", placeId).then(res => {
-      if (res.exists && oldCat !== newCat) {
-        let catObjCopy = res.data()[`${men}`];
-        let itemObjCopy = catObjCopy[`${oldCat}`][`${itemId}`];
-
-        // if the newCat is literally a newly added category ie it dne in firestore
-        if (catObjCopy[`${newCat}`] === undefined) {
-          let tempObj = {};
-          tempObj[`${newCat}`] = { type_description: "" };
-
-          // merge the new obj with catObjCopy
-          catObjCopy = { ...catObjCopy, ...tempObj };
-        }
-
-        // add object to the new category
-        catObjCopy[`${newCat}`][`${itemId}`] = itemObjCopy;
-        // delete object from the old category
-        delete catObjCopy[`${oldCat}`][`${itemId}`];
-
-        // Update firebase
-        this.writeItems(placeId, `${men}`, catObjCopy);
-      }
-    });
-  }
-
-  // Ref: MenuBoard.js
-  // Des: Updates category names.grabs the menu in view from firestore then will do one of the two
-  //      things. Will create new cat object with new name write it to database then
-  //      deletes the old object (essentially replacing) /OR/ Will create new cat object and
-  //      write to database
-  // Pre: men must be valid menu name, both oldCat and newCat must be valid
-  //      category (string & exists), itemId must exist
-  // Post: Firebase will be updated with the new category
-  @action
-  writeNewCategoryName(placeId, men, oldCat, newCat) {
-    RequestHandler.getDocument("Menus", placeId).then(res => {
-      if (res.exists) {
-        let catObjCopy = res.data()[`${men}`];
-
-        // If the old key exists replace it
-        if (`${oldCat}` in catObjCopy) {
-          // Make sure the new cat name is not the same as the old
-          if (newCat !== oldCat) {
-            // Taken from stack overflow. does some magic to delete and add keys
-            Object.defineProperty(
-              catObjCopy,
-              newCat,
-              Object.getOwnPropertyDescriptor(catObjCopy, oldCat)
-            );
-
-            // delete the old key
-            delete catObjCopy[oldCat];
-
-            // Update firebase
-            this.writeItems(placeId, `${men}`, catObjCopy);
-          }
-        }
-        // Create new category and add it to firestore
-        else {
-          catObjCopy[`${newCat}`] = {};
-        }
-      }
-    });
-  }
-
-  // Ref: MenuBoard.js
-  // Des: Will remove item from menu
-  // Pre: men must be valid menu name, both oldCat and newCat must be valid
-  //      category (string & exists), itemId must exist
-  // Post: Firebase will be updated with the menu
-  @action
-  writeMenus(placeId, menu, cat, itemId) {
-    RequestHandler.getDocument("Menus", placeId).then(res => {
-      if (res.exists) {
-        let oldMenu = res.data();
-        let newMenu = oldMenu;
-        let tempEditedCat = {}
-
-        for(let item in oldMenu[`${menu}`][`${cat}`]) {
-            if(item === itemId) {
-                
-                console.log("found");
-            }
-            else {
-                tempEditedCat[`${item}`] = oldMenu[`${menu}`][`${cat}`][`${item}`];
-            }
-        }
-
-        newMenu[`${menu}`][`${cat}`] = tempEditedCat;
-        RequestHandler.setDocument("Menus", placeId, newMenu);
-      }
-      else {
-          console.log("error at CreateTabStore -> writeMenus");
-      }
-    });
-  }
-
-  // ==================== WRITES TO DATABASE: END ==================== //
 
   // ==================== SETS OBSERVABLES: START ==================== //
   /*
@@ -503,15 +177,16 @@ export class CreateTabStore {
 
   // Ref: ItemModal.js
   // Des: This updates this.items key with the given path to the newVal
-  // Pre: path must be formatted as a period separated string, with the 3(el 2) string being the uuid of the item
-  //      and the 4(el 3) string being the name of the key to edit. EX: "Food Menu.Deserts.4a4f4380-0c01-11e9-a3e5-cd6beef52e09.name"
+  // Pre: path must be formatted as a period separated string, with the 1st(el 0) string being the uuid of the item
+  //      and the 2nd(el 1) string being the name of the key to edit. EX: "4a4f4380-0c01-11e9-a3e5-cd6beef52e09.name"
   //      value must match key required formatting
   // Post: Then path in this local store will be updated to newVal
   @action
   setItems(path, newVal) {
-    let edited_id = path.split(".")[2];
-    let edited_key = path.split(".")[3];
+    let edited_id = path.split(".")[0];  // item id
+    let edited_key = path.split(".")[1]; // edited key
 
+    // search array for item with same id, edit that item
     for (let item of this.items) {
       if (item.id === edited_id) {
         item[`${edited_key}`] = newVal;
@@ -619,8 +294,303 @@ export class CreateTabStore {
     this.menuCategories = knownCats;
     this.menusTree = retObj;
   }
-
   // ==================== SETS OBSERVABLES: END ==================== //
+
+  // ==================== READS FROM DATABASE: START ==================== //
+  /*
+   *  These functions read from firestore, they do not mutate the db in any way,
+   *  however some functions may mutate store observables. Each function should be
+   *  camelCased and prefixed with 'read'.
+   *
+   *  Contents:
+   *      1. readPlaces()
+   *      2. readItems()
+   *
+   */
+
+  // Ref: Profile.js
+  // Des: This function grabs all the info for place with placeId and converts database time
+  //      to human readable time.
+  // Pre: PlaceId must be valid (exist in db)
+  // Post: profileSubStore will be updated with new data, with formatted hours.
+  @action
+  readPlaces(placeId) {
+    RequestHandler.getDocument("Places", placeId).then(
+      action("success", res => {
+        if (res.exists) {
+          let tempRetObj = { formatted_hours: [] };
+          let count = 0;
+
+          for (let h of res.data().hours) {
+            // split time into hours and mins and convert to number
+            var openHour = Number(h.open.split(":")[0]);
+            var openMin = Number(h.open.split(":")[1]);
+            var openForHour = Number(h.open_for.split(":")[0]);
+            var openForMin = Number(h.open_for.split(":")[1]);
+            var closeTime = "23:00"; //the one and only close time :)
+            var minSum = openMin + openForMin;
+            var offset = 0;
+
+            // when added openForMin+openMin can be >= 60 which is invalid, this will reset the mins and add one to hour
+            if (minSum >= 60) {
+              openForMin = minSum - 60;
+              offset = 1;
+            }
+
+            // convert to decimal time representation (. instead of :)
+            var closeDec = offset + openHour + openForHour + openForMin / 100;
+
+            // format the close time if its not correct
+            if (closeDec >= 24) {
+              var tempHour = openHour + openForHour - 24;
+              var tempMin = openForMin;
+
+              if (tempHour === 0) {
+                tempHour = "00";
+                tempMin = "00";
+              } else {
+                if (tempHour < 10) {
+                  tempHour = `0${tempHour}`;
+                }
+                if (tempMin < 10) {
+                  tempMin = `0${tempMin}`;
+                }
+              }
+
+              closeTime = `${tempHour}:${tempMin}`;
+            }
+
+            // insert object by day 0=sunday 6=sat
+            tempRetObj.formatted_hours[count] = {
+              open: moment(h.open, "HH:mm").format("h:mm a"),
+              close: moment(closeTime, "HH:mm").format("h:mm a")
+            };
+
+            // increment count to next day
+            count++;
+          }
+
+          // copy unformatted hours to have the time open for available to components
+          let unformatted_hours = {
+            unformatted_hours: res.data().hours
+          };
+
+          this.profileSubStore.profileData = {
+            ...res.data(),
+            ...tempRetObj,
+            ...unformatted_hours
+          };
+
+          this.profileSubStore.loading = false;
+        }
+      })
+    );
+  }
+
+  // Ref: Items.js & Menus.js
+  // Des: Grabs all items from Items document in firestore, and maps it to local
+  //      formated array of items.
+  // Pre: placeId must be valid.
+  // Post: this.items will contained an unorganized array of items
+  @action
+  readItems(placeId) {
+    // clear array to push to
+    this.items = [];
+
+    RequestHandler.getDocument("Items", placeId)
+      .then(
+        action("success", res => {
+          if (res.exists) {
+            // map data() to local var
+            let data = res.data();
+
+            // Convert the object of Items into an array of items with the key being the objects id
+            this.items = Object.keys(data).map(key => {
+              return { ...data[key], ...{ id: key } };
+            });
+
+            // loading finished
+            this.itemSubStore.loading = false;
+          } else {
+            console.log("Items do not exist");
+          }
+        })
+      )
+      .catch(err => {
+        console.log(`Catched at CreateTabStore, readItems(): ${err}`);
+      });
+  }
+
+  // ==================== READS FROM DATABASE: END ==================== //
+
+  // ==================== WRITES TO DATABASE: START ==================== //
+  /*
+   *  These functions write to firestore. Each function should be
+   *  camelCased and prefixed with 'write'.
+   *
+   *  Contents:
+   *      1. writePlaces()
+   *      2. writeItems()
+   *      3. writeItemCategory()
+   *      4. writeNewCategoryName()
+   *      5. writeMenus()
+   */
+
+  // Ref: Profile.js
+  // Des: Writes the edited data to firebase
+  // Pre: placeId must be valid & exist
+  // Post: For the keys updated, controlled by DBUpdateKeys, firebase will
+  //       be updated with the new key/value pairs.
+  @action
+  writePlaces(placeId) {
+    let updateQueued = false;
+    let tempObj = {};
+
+    // only change the updated values
+    for (let k in this.profileSubStore.DBUpdatedKeys) {
+      if (this.profileSubStore.DBUpdatedKeys[`${k}`]) {
+        if (k === "hours") {
+          tempObj[`${k}`] = this.profileSubStore.profileData.unformatted_hours;
+        } else {
+          tempObj[`${k}`] = this.profileSubStore.profileData[`${k}`];
+        }
+
+        // reset flag, trigger update
+        this.profileSubStore.DBUpdatedKeys[`${k}`] = false;
+        updateQueued = true;
+      }
+    }
+
+    // update if necessary
+    if (updateQueued) {
+      RequestHandler.updateDocument("Places", placeId, tempObj).then(res => {
+        console.log("updated");
+      });
+    }
+  }
+
+  // Ref: ItemModal.js
+  // Des: Updates the Items element with placeId and path to newVal.
+  // Pre: placeId and path must be valid (exists in db) and string format,
+  //      newVal should follow the format of its key.
+  // Post: if successful, Items document will be updated, otherwise error will be caught
+  @action
+  writeItems(placeId, path, newVal) {
+    //format object to update store with
+    let tempObj = {};
+    tempObj[path] = newVal;
+    
+    RequestHandler.updateDocument("Items", placeId, tempObj)
+      .then(res => {
+        console.log("Items updated");
+      })
+      .catch(err => {
+        console.log(`Error at writeItems() in CreateTabStore.js: ${err}`);
+      });
+  }
+
+  // Ref: ItemModal.js & MenuBoard.js
+  // Des: Moves item to a new category and writes update to firestore
+  // Pre: men must be valid menu name, both oldCat and newCat must be valid
+  //      category (string & exists), itemId must exist
+  // Post: Firestore will be updated with the new categories & items
+  @action
+  writeItemCategory(placeId, men, itemId, oldCat, newCat) {
+    RequestHandler.getDocument("Menus", placeId).then(res => {
+      if (res.exists && oldCat !== newCat) {
+        let catObjCopy = res.data()[`${men}`];
+        let itemObjCopy = catObjCopy[`${oldCat}`][`${itemId}`];
+
+        // if the newCat is literally a newly added category ie it dne in firestore
+        if (catObjCopy[`${newCat}`] === undefined) {
+          let tempObj = {};
+          tempObj[`${newCat}`] = { type_description: "" };
+
+          // merge the new obj with catObjCopy
+          catObjCopy = { ...catObjCopy, ...tempObj };
+        }
+
+        // add object to the new category
+        catObjCopy[`${newCat}`][`${itemId}`] = itemObjCopy;
+        // delete object from the old category
+        delete catObjCopy[`${oldCat}`][`${itemId}`];
+
+        // Update firebase
+        this.writeItems(placeId, `${men}`, catObjCopy);
+      }
+    });
+  }
+
+  // Ref: MenuBoard.js
+  // Des: Updates category names.grabs the menu in view from firestore then will do one of the two
+  //      things. Will create new cat object with new name write it to database then
+  //      deletes the old object (essentially replacing) /OR/ Will create new cat object and
+  //      write to database
+  // Pre: men must be valid menu name, both oldCat and newCat must be valid
+  //      category (string & exists), itemId must exist
+  // Post: Firebase will be updated with the new category
+  @action
+  writeNewCategoryName(placeId, men, oldCat, newCat) {
+    RequestHandler.getDocument("Menus", placeId).then(res => {
+      if (res.exists) {
+        let catObjCopy = res.data()[`${men}`];
+
+        // If the old key exists replace it
+        if (`${oldCat}` in catObjCopy) {
+          // Make sure the new cat name is not the same as the old
+          if (newCat !== oldCat) {
+            // Taken from stack overflow. does some magic to delete and add keys
+            Object.defineProperty(
+              catObjCopy,
+              newCat,
+              Object.getOwnPropertyDescriptor(catObjCopy, oldCat)
+            );
+
+            // delete the old key
+            delete catObjCopy[oldCat];
+
+            // Update firebase
+            this.writeItems(placeId, `${men}`, catObjCopy);
+          }
+        }
+        // Create new category and add it to firestore
+        else {
+          catObjCopy[`${newCat}`] = {};
+        }
+      }
+    });
+  }
+
+  // Ref: MenuBoard.js
+  // Des: Will remove item from menu
+  // Pre: men must be valid menu name, both oldCat and newCat must be valid
+  //      category (string & exists), itemId must exist
+  // Post: Firebase will be updated with the menu
+  @action
+  writeMenus(placeId, menu, cat, itemId) {
+    RequestHandler.getDocument("Menus", placeId).then(res => {
+      if (res.exists) {
+        let oldMenu = res.data();
+        let newMenu = oldMenu;
+        let tempEditedCat = {};
+
+        for (let item in oldMenu[`${menu}`][`${cat}`]) {
+          if (item === itemId) {
+            console.log("found");
+          } else {
+            tempEditedCat[`${item}`] = oldMenu[`${menu}`][`${cat}`][`${item}`];
+          }
+        }
+
+        newMenu[`${menu}`][`${cat}`] = tempEditedCat;
+        RequestHandler.setDocument("Menus", placeId, newMenu);
+      } else {
+        console.log("error at CreateTabStore -> writeMenus");
+      }
+    });
+  }
+
+  // ==================== WRITES TO DATABASE: END ==================== //
 }
 
 export default new CreateTabStore();
