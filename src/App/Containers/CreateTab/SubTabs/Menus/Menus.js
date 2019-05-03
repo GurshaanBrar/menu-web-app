@@ -19,6 +19,7 @@ import { Row, Col } from "react-bootstrap";
 import ItemModal from "../../../../Components/ItemModal/ItemModal";
 import ItemsPreview from "../../../../Components/ItemsPreview/ItemsPreview";
 import FontAwesome from "react-fontawesome";
+import { toJS } from "mobx";
 
 @inject("CreateTabStore")
 @inject("globalStore")
@@ -44,7 +45,8 @@ class Menus extends Component {
     // Post: item data is updated in store
     componentDidMount() {
         console.log("Menus.js did mount");
-        this.store.readItems(this.globalStore.placeId);
+        this.store.readMenus(this.globalStore.placeId);
+        this.store.readItems(this.globalStore.placeId);        
     }
 
     // Des: closes the item modal
@@ -87,7 +89,7 @@ class Menus extends Component {
             ];
             let count = 0;
 
-            for (let m of this.store.menus) {
+            for (let m in this.store.menus) {               
                 tempMenus.push({ name: m, uri: stockImages[count] });
                 count++;
             }

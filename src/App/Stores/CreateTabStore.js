@@ -220,9 +220,15 @@ export class CreateTabStore {
     } else {
       let tempCats = []; // This will replace our formattedCatagories
       let menuName = this.menuSubStore.menuInView; // The menu in views name
+      let categories = []; // list of known categories
+      let el0 = 0; // index of category
+      let count = 0; // used to track element index
 
       // make new lane for each known category
-      for (let m of toJS(this.menusTree[`${menuName}`])) {
+      for (let m in toJS(this.menus[`${menuName}`])) {
+        // adds cat to know categories
+        categories.push(m);
+
         tempCats.push({
           id: m,
           title: m,
@@ -230,27 +236,20 @@ export class CreateTabStore {
         });
       }
 
-      // Move items to there lanes
-      for (let i of toJS(this.items)) {
-        // if it is the menu in view then format the card
-        if (i.menu === menuName) {
-          let el0 = 0; // index of category
-          let count = 0; // used to track element index
+      // iterate through each cat
+      for (let cat of categories) {
+        // check each item to see if its id belongs this cat
+        for (let i of toJS(this.items)) {
+          if (this.menus[`${menuName}`][`${cat}`].items.includes(i.id)) {
+            // if the id matches the category push to the correct lane(cat)
+            el0 = count;
 
-          // search for the index of the items category to push to temp cats
-          for (let t of tempCats) {
-            // if the category matches then return the index of the category
-            if (t.id === i.category) {
-              el0 = count;
-              count = 0;
-              break;
-            }
-            count++; //increment count
+            // push new card to the tempCats
+            tempCats[`${el0}`].cards.push(i);
           }
-
-          // push new card to the tempCats
-          tempCats[`${el0}`].cards.push(i);
         }
+
+        count++; //increment count
       }
 
       this.menuSubStore.formattedCatagories = tempCats;
@@ -419,6 +418,36 @@ export class CreateTabStore {
 
             // loading finished
             this.itemSubStore.loading = false;
+          } else {
+            console.log("Items do not exist");
+          }
+        })
+      )
+      .catch(err => {
+        console.log(`Catched at CreateTabStore, readItems(): ${err}`);
+      });
+  }
+
+  // Ref: Items.js & Menus.js
+  // Des: Grabs all items from Items document in firestore, and maps it to local
+  //      formated array of items.
+  // Pre: placeId must be valid.
+  // Post: this.items will contained an unorganized array of items
+  @action
+  readMenus(placeId) {
+    // clear array to push to
+    this.menu = [];
+
+    RequestHandler.getDocument("Menus", placeId)
+      .then(
+        action("success", res => {
+          if (res.exists) {
+            // map data() to local var
+            let data = res.data();
+            this.menus = data;
+
+            // loading finished
+            this.menuSubStore.loading = false;
           } else {
             console.log("Items do not exist");
           }
