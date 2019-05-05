@@ -42,12 +42,18 @@ class Menus extends Component {
 
   // ========== FUNCTIONS ========== //
 
-  // Des: Fetches items data
+  // Des: Fetches items data, reads items before reading menus
   // Post: item data is updated in store
   componentDidMount() {
     console.log("Menus.js did mount");
-    this.store.readItems(this.globalStore.placeId);
-    this.store.readMenus(this.globalStore.placeId);
+    this.store
+      .readItems(this.globalStore.placeId)
+      .then(resp => {
+        this.store.readMenus(this.globalStore.placeId);
+      })
+      .catch(err => {
+        console.log(err);
+      });
   }
 
   // Des: closes the item modal
@@ -165,7 +171,8 @@ class Menus extends Component {
                   className="menus-add-category-button"
                   style={{ height: 50 }}
                 >
-                  <i style={{ fontSize: 14 }} className="fas fa-plus" /> Add Category
+                  <i style={{ fontSize: 14 }} className="fas fa-plus" /> Add
+                  Category
                 </div>
               </div>
             </Col>

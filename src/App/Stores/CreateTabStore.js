@@ -32,9 +32,10 @@ export class CreateTabStore {
 
   //  Store for all tabs under CreateTab
   @observable items = []; // All items
-  @observable menus = []; // list of menu names for a place
+  @observable menus = {}; // list of menu names for a place
   @observable menuCategories = []; // List of categories for a menu
   @observable menusTree = []; // Preserves relationship between menus -> categories -> and items
+
   // SubStore for Profile tab, mapped from Places in db.
   @observable profileSubStore = {
     loading: true, // status of data fetch
@@ -55,7 +56,6 @@ export class CreateTabStore {
 
   // SubStore for Items tab, mapped from Menus in db.
   @observable itemSubStore = {
-    items: [],
     loading: true,
     itemInView: ""
   };
@@ -81,11 +81,10 @@ export class CreateTabStore {
    *      3. setItems()
    *      4. setFormattedCategories()
    *      5. setMenuInView()
-   *      6. setMenuCategories()
    *
    */
 
-  // Ref: ItemCard.js & MenuBoard.js
+  // Ref: ItemCard.js & ItemModal.js & MenuBoard.js
   // Des: Changes the item which will appear in modal.
   // Pre: newItem must be correctly formatted object, subStore must be,
   //      item or menu.
@@ -176,7 +175,7 @@ export class CreateTabStore {
     }
   }
 
-  // Ref: ItemModal.js & Items.js
+  // Ref: ItemModal.js & MenuBoard.js & Items.js
   // Des: This updates this.items key with the given path to the newVal or adds a new item to items array
   // Pre: path must be formatted as a period separated string, with the 1st(el 0) string being the uuid of the item
   //      and the 2nd(el 1) string being the name of the key to edit. EX: "4a4f4380-0c01-11e9-a3e5-cd6beef52e09.name"
@@ -189,6 +188,7 @@ export class CreateTabStore {
       let edited_key = path.split(".")[1]; // edited key
 
       if (action === "add") {
+        // Add new item to this.items
         this.items.push(newVal);
       } else {
         // search array for item with same id, edit that item
@@ -202,28 +202,29 @@ export class CreateTabStore {
     });
   }
 
-  // Ref: Menus.js
+  // Ref: MenuBoard.js & Menus.js
   // Des: Will sort all items belonging to the menuInView into there categories, specially
   //      formatted for the menu boards. if action is add, new lane (category is added).
-  // Pre: if action != add, menusTree and menuCategories should not be empty (must be already sorted).
-  //      menuInView in menuSubStore must also be set to a valid menu.
+  // Pre: if action != add, menuInView in menuSubStore must be set to a valid menu.
   // Post: menuSubStore's formattedCategories will be set to the formatted array of categories + items
   //       if action is add then formatted catagories will have a new category.
   @action
   setFormattedCategories(action = "") {
+    // Adds a new lane to the formattedCategories(category)
     if (action === "add") {
       this.menuSubStore.formattedCatagories.push({
         id: "New Category",
         title: "New Category",
         cards: []
       });
-    } else {
+    }
+    // Makes a lane for each category for the menuInView then adds all items data to the cards array
+    else {
       let tempCats = []; // This will replace our formattedCatagories
       let menuName = this.menuSubStore.menuInView; // The menu in views name
       let categories = []; // list of known categories
-      let el0 = 0; // index of category
       let count = 0; // used to track element index
-      let targetIndex // saves the index to push to 
+      let targetIndex; // saves the index to push to
 
       // make new lane for each known category
       for (let m in toJS(this.menus[`${menuName}`])) {
@@ -239,9 +240,8 @@ export class CreateTabStore {
 
       // iterate through each cat
       for (let cat of categories) {
-        // for each array of items in each category 
+        // for each array of items in each category
         for (let id of this.menus[`${menuName}`][`${cat}`].items) {
-
           // find the index of id in this.items by id
           targetIndex = this.items
             .map(i => {
@@ -269,42 +269,6 @@ export class CreateTabStore {
     this.menuSubStore.menuInView = newMenuInView;
   }
 
-  // Ref: CreateTabStore.js (yes this class :D)
-  // Des: Will sort all items into its tree, as well as record all
-  //      categories encountered.
-  // Pre: this.items should not be empty.
-  // Post: menuCategories will be reset with all the category names, and
-  //       menusTree will be reset preserving the new parent child relationship
-  //       between menus -> categories -> items.
-  @action
-  setMenuCategories() {
-    let retObj = {};
-    let knownCats = [];
-    let knownMenus = [];
-    let len = this.items.length;
-
-    for (let it = 0; it < len; it++) {
-      let el = this.items[it];
-
-      if (knownMenus.indexOf(el.menu) < 0) {
-        knownMenus.push(el.menu);
-        retObj[el.menu] = [];
-      }
-    }
-
-    // get list of categories
-    for (let it = 0; it < len; it++) {
-      let el = this.items[it];
-      // sort only the items in menu in view assuming menu exists
-      if (knownCats.indexOf(el.category) < 0) {
-        knownCats.push(el.category);
-        retObj[el.menu].push(el.category);
-      }
-    }
-
-    this.menuCategories = knownCats;
-    this.menusTree = retObj;
-  }
   // ==================== SETS OBSERVABLES: END ==================== //
 
   // ==================== READS FROM DATABASE: START ==================== //
@@ -316,6 +280,7 @@ export class CreateTabStore {
    *  Contents:
    *      1. readPlaces()
    *      2. readItems()
+   *      3. readMenus()
    *
    */
 
@@ -400,43 +365,51 @@ export class CreateTabStore {
 
   // Ref: Items.js & Menus.js
   // Des: Grabs all items from Items document in firestore, and maps it to local
-  //      formated array of items.
+  //      array of items.
   // Pre: placeId must be valid.
-  // Post: this.items will contained an unorganized array of items
+  // Post: this.items will contained an unorganized array of items, Returns promise with fetch success bool
   @action
   readItems(placeId) {
-    // clear array to push to
-    this.items = [];
+    return new Promise((resolve, reject) => {
+      // clear array to push to
+      this.items = [];
 
-    RequestHandler.getDocument("Items", placeId)
-      .then(
-        action("success", res => {
-          if (res.exists) {
-            // map data() to local var
-            let data = res.data();
+      // Get all Items from DB
+      RequestHandler.getDocument("Items", placeId)
+        .then(
+          action("success", res => {
+            if (res.exists) {
+              // map data() to local var
+              let data = res.data();
 
-            // Convert the object of Items into an array of items with the key being the objects id
-            this.items = Object.keys(data).map(key => {
-              return { ...data[key], ...{ id: key } };
-            });
+              // Convert the object of Items into an array of items with the key being the objects id
+              this.items = Object.keys(data).map(key => {
+                return { ...data[key], ...{ id: key } };
+              });
 
-            // loading finished
-            this.itemSubStore.loading = false;
-          } else {
-            console.log("Items do not exist");
-          }
-        })
-      )
-      .catch(err => {
-        console.log(`Catched at CreateTabStore, readItems(): ${err}`);
-      });
+              // loading finished
+              this.itemSubStore.loading = false;
+
+              // resolve promise (success)
+              resolve(true);
+            } else {
+              console.log("Items do not exist");
+              reject(false);
+            }
+          })
+        )
+        .catch(err => {
+          console.log(`Catched at CreateTabStore, readItems(): ${err}`);
+          reject(err);
+        });
+    });
   }
 
-  // Ref: Items.js & Menus.js
-  // Des: Grabs all items from Items document in firestore, and maps it to local
-  //      formated array of items.
+  // Ref: Menus.js
+  // Des: Grabs all Menus from Menus document in firestore, and maps it to local
+  //      formated object.
   // Pre: placeId must be valid.
-  // Post: this.items will contained an unorganized array of items
+  // Post: this.menus will contained a formatted object mirroring firebase
   @action
   readMenus(placeId) {
     // clear array to push to
@@ -452,7 +425,6 @@ export class CreateTabStore {
 
             // loading finished
             this.menuSubStore.loading = false;
-            console.log(this.menus);
           } else {
             console.log("Items do not exist");
           }
@@ -511,7 +483,7 @@ export class CreateTabStore {
     }
   }
 
-  // Ref: ItemModal.js
+  // Ref: ItemModal.js & Items.js
   // Des: Updates the Items element with placeId and path to newVal.
   // Pre: placeId and path must be valid (exists in db) and string format,
   //      newVal should follow the format of its key.
@@ -531,14 +503,15 @@ export class CreateTabStore {
       });
   }
 
-  // Ref: ItemModal.js & MenuBoard.js
-  // Des: Moves item to a new category and writes update to firestore
+  // Ref: MenuBoard.js
+  // Des: Moves item to a new category or moves Items position in category
+  //      and writes update to firestore. Either way the positioning of each item is preserved
   // Pre: men must be valid menu name, both oldCat and newCat must be valid
   //      category (string & exists), itemId must exist
-  // Post: Firestore will be updated with the new categories & items
+  // Post: Firestore will be updated with the new menu
   @action
   writeItemCategory(placeId, men, itemId, oldCat, newCat, position) {
-    // RequestHandler.getDocument("Menus", placeId).then(res => {
+    // Changing Categories
     if (oldCat !== newCat) {
       let catObjCopy = this.menus;
       let count = 0;
@@ -565,7 +538,9 @@ export class CreateTabStore {
 
       // Update firebase
       RequestHandler.setDocument("Menus", placeId, catObjCopy);
-    } else {
+    }
+    // Changing position in a category
+    else {
       let catObjCopy = this.menus;
       let count = 0;
       let temp = null;
@@ -590,7 +565,6 @@ export class CreateTabStore {
       // Update firebase
       RequestHandler.setDocument("Menus", placeId, catObjCopy);
     }
-    // });
   }
 
   // Ref: MenuBoard.js
@@ -640,39 +614,29 @@ export class CreateTabStore {
   // Post: Firebase will be updated with the menu
   @action
   writeMenus(placeId, menu, cat, itemId) {
-    // RequestHandler.getDocument("Menus", placeId).then(res => {
-      // if (res.exists) {
-        let oldMenu = this.menus;
-        let newMenu = oldMenu;
-        let tempEditedCat = [];
-       
+    let oldMenu = this.menus; // copy of menus
+    let newMenu = oldMenu; // copy of the copy...
+    let tempEditedCat = []; // new items array
 
-        for (let item of oldMenu[`${menu}`][`${cat}`].items) {
-          console.log(item);
-          
-          if (item === itemId) {
-            console.log("found");
-          } else {
-            tempEditedCat.push(item);
-          }
-        }
+    // iterate through the menu/category items array and copy all items except the one to delete
+    for (let item of oldMenu[`${menu}`][`${cat}`].items) {
+      if (item !== itemId) {
+        tempEditedCat.push(item);
+      }
+    }
 
-        newMenu[`${menu}`][`${cat}`].items = tempEditedCat;
+    // replace old menu/category items array with new one without delete item
+    newMenu[`${menu}`][`${cat}`].items = tempEditedCat;
 
-        console.log(newMenu);
-        
-        RequestHandler.setDocument("Menus", placeId, newMenu);
-      // } else {
-      //   console.log("error at CreateTabStore -> writeMenus");
-      // }
-    // });
+    // write to db
+    RequestHandler.setDocument("Menus", placeId, newMenu);
   }
   // ==================== WRITES TO DATABASE: END ==================== //
 
   // ==================== DELETES: START ==================== //
   /*
    *  These functions deletes objects first from the database then from the local
-   *  cache.
+   *  cache. Must be prefixed by delete
    *
    *  Contents:
    *      1. deleteItem()
