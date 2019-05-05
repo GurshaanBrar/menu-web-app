@@ -223,6 +223,7 @@ export class CreateTabStore {
       let categories = []; // list of known categories
       let el0 = 0; // index of category
       let count = 0; // used to track element index
+      let targetIndex // saves the index to push to 
 
       // make new lane for each known category
       for (let m in toJS(this.menus[`${menuName}`])) {
@@ -238,15 +239,18 @@ export class CreateTabStore {
 
       // iterate through each cat
       for (let cat of categories) {
-        // check each item to see if its id belongs this cat
-        for (let i of toJS(this.items)) {
-          if (this.menus[`${menuName}`][`${cat}`].items.includes(i.id)) {
-            // if the id matches the category push to the correct lane(cat)
-            el0 = count;
+        // for each array of items in each category 
+        for (let id of this.menus[`${menuName}`][`${cat}`].items) {
 
-            // push new card to the tempCats
-            tempCats[`${el0}`].cards.push(i);
-          }
+          // find the index of id in this.items by id
+          targetIndex = this.items
+            .map(i => {
+              return i.id;
+            })
+            .indexOf(id);
+
+          // push new card to the tempCats using items at targetIndex
+          tempCats[`${count}`].cards.push(this.items[targetIndex]);
         }
 
         count++; //increment count
@@ -448,6 +452,7 @@ export class CreateTabStore {
 
             // loading finished
             this.menuSubStore.loading = false;
+            console.log(this.menus);
           } else {
             console.log("Items do not exist");
           }
@@ -532,30 +537,60 @@ export class CreateTabStore {
   //      category (string & exists), itemId must exist
   // Post: Firestore will be updated with the new categories & items
   @action
-  writeItemCategory(placeId, men, itemId, oldCat, newCat) {
-    RequestHandler.getDocument("Menus", placeId).then(res => {
-      if (res.exists && oldCat !== newCat) {
-        let catObjCopy = res.data()[`${men}`];
-        let itemObjCopy = catObjCopy[`${oldCat}`][`${itemId}`];
+  writeItemCategory(placeId, men, itemId, oldCat, newCat, position) {
+    // RequestHandler.getDocument("Menus", placeId).then(res => {
+    if (oldCat !== newCat) {
+      let catObjCopy = this.menus;
+      let count = 0;
 
-        // if the newCat is literally a newly added category ie it dne in firestore
-        if (catObjCopy[`${newCat}`] === undefined) {
-          let tempObj = {};
-          tempObj[`${newCat}`] = { type_description: "" };
+      // if the newCat is literally a newly added category ie it dne in firestore
+      // if (catObjCopy[`${newCat}`] === undefined) {
+      //   let tempObj = {};
+      //   tempObj[`${newCat}`] = { type_description: "" };
 
-          // merge the new obj with catObjCopy
-          catObjCopy = { ...catObjCopy, ...tempObj };
+      //   // merge the new obj with catObjCopy
+      //   catObjCopy = { ...catObjCopy, ...tempObj };
+      // }
+
+      // add object to the new category
+      catObjCopy[`${men}`][`${newCat}`].items.splice(position, 0, itemId);
+
+      // remove from old cat
+      for (let id of catObjCopy[`${men}`][`${oldCat}`].items) {
+        if (id === itemId) {
+          catObjCopy[`${men}`][`${oldCat}`].items.splice(count, 1);
+        }
+        count++;
+      }
+
+      // Update firebase
+      RequestHandler.setDocument("Menus", placeId, catObjCopy);
+    } else {
+      let catObjCopy = this.menus;
+      let count = 0;
+      let temp = null;
+      let oldIndex = -1;
+
+      console.log(itemId);
+
+      // remove from old cat
+      for (let id of catObjCopy[`${men}`][`${newCat}`].items) {
+        if (id === itemId) {
+          oldIndex = count;
         }
 
-        // add object to the new category
-        catObjCopy[`${newCat}`][`${itemId}`] = itemObjCopy;
-        // delete object from the old category
-        delete catObjCopy[`${oldCat}`][`${itemId}`];
-
-        // Update firebase
-        this.writeItems(placeId, `${men}`, catObjCopy);
+        count++;
       }
-    });
+
+      temp = catObjCopy[`${men}`][`${newCat}`].items[position];
+      catObjCopy[`${men}`][`${newCat}`].items[position] = itemId;
+      catObjCopy[`${men}`][`${newCat}`].items[oldIndex] = temp;
+      catObjCopy[`${men}`][`${newCat}`].items;
+
+      // Update firebase
+      RequestHandler.setDocument("Menus", placeId, catObjCopy);
+    }
+    // });
   }
 
   // Ref: MenuBoard.js
@@ -605,26 +640,32 @@ export class CreateTabStore {
   // Post: Firebase will be updated with the menu
   @action
   writeMenus(placeId, menu, cat, itemId) {
-    RequestHandler.getDocument("Menus", placeId).then(res => {
-      if (res.exists) {
-        let oldMenu = res.data();
+    // RequestHandler.getDocument("Menus", placeId).then(res => {
+      // if (res.exists) {
+        let oldMenu = this.menus;
         let newMenu = oldMenu;
-        let tempEditedCat = {};
+        let tempEditedCat = [];
+       
 
-        for (let item in oldMenu[`${menu}`][`${cat}`]) {
+        for (let item of oldMenu[`${menu}`][`${cat}`].items) {
+          console.log(item);
+          
           if (item === itemId) {
             console.log("found");
           } else {
-            tempEditedCat[`${item}`] = oldMenu[`${menu}`][`${cat}`][`${item}`];
+            tempEditedCat.push(item);
           }
         }
 
-        newMenu[`${menu}`][`${cat}`] = tempEditedCat;
+        newMenu[`${menu}`][`${cat}`].items = tempEditedCat;
+
+        console.log(newMenu);
+        
         RequestHandler.setDocument("Menus", placeId, newMenu);
-      } else {
-        console.log("error at CreateTabStore -> writeMenus");
-      }
-    });
+      // } else {
+      //   console.log("error at CreateTabStore -> writeMenus");
+      // }
+    // });
   }
   // ==================== WRITES TO DATABASE: END ==================== //
 

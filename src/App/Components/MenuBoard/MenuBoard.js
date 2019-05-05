@@ -137,14 +137,16 @@ class CustomCard extends Component {
   }
 
   handleDelete(e) {
+    console.log(this.props);
+    
     e.stopPropagation(); //stops parent onClick from also firing.
     //To remove a card
     eventBus.publish({
       type: "REMOVE_CARD",
-      laneId: this.props.category,
+      laneId: this.props.laneId,
       cardId: this.props.id
     });
-    this.store.writeMenus(this.globalStore.placeId, this.props.menu, this.props.category, this.props.id);
+    this.store.writeMenus(this.globalStore.placeId, this.store.menuSubStore.menuInView, this.props.laneId, this.props.id);
   }
 
   render() {
@@ -218,14 +220,15 @@ export default class MenuBoard extends Component {
             this.store.menuSubStore.menuInView,
             cardId,
             sourceLaneId,
-            targetLaneId
+            targetLaneId,
+            position,
           );
-          console.log(cardDetails.breadcrumb + "category");
-          this.store.setItems(
-            `${cardDetails.breadcrumb}.category`,
-            targetLaneId
-          );
-          this.store.setFormattedCategories();
+          // console.log(cardDetails.breadcrumb + "category");
+          // this.store.setItems(
+          //   `${cardDetails.breadcrumb}.category`,
+          //   targetLaneId
+          // );
+          // this.store.setFormattedCategories();
         }}
         style={{ backgroundColor: "inherit" }}
       >
