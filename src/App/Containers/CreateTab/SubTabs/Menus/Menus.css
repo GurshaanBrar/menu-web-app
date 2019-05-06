@@ -15,3 +15,12 @@
 .menus-add-category-button:hover {
     background-color: darkgrey;
 }
+
+.switch-button {
+    width:500
+}
+
+/* overwrite react-switch-button */
+div.btn {
+    width:80px;
+}

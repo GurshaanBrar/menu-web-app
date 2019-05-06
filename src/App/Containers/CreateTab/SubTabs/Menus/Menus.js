@@ -20,6 +20,7 @@ import ItemModal from "../../../../Components/ItemModal/ItemModal";
 import ItemsPreview from "../../../../Components/ItemsPreview/ItemsPreview";
 import FontAwesome from "react-fontawesome";
 import MottoBox from "../../../../Components/MottoBox/MottoBox";
+import BootstrapSwitchButton from "bootstrap-switch-button-react";
 import "./Menus.css";
 
 @inject("CreateTabStore")
@@ -127,9 +128,22 @@ class Menus extends Component {
                 <h2 style={{ marginLeft: "3%", paddingBottom: "2%" }}>
                   {this.store.menuSubStore.menuInView}
                 </h2>
+                <div style={{marginLeft: '2%'}}>
+
+                <BootstrapSwitchButton
+                  checked={true}
+                  onlabel="Enabled"
+                  onstyle="success"
+                  offlabel="Disabled"
+                  offstyle="danger"
+                  onChange={(checked) => {
+                  }}
+                />
+                </div>
                 {/* <div
                   className="items-add-item"
-                  onClick={() => this.store.setFormattedCategories("add")}
+                  onClick={() => {}}
+                  style={{position: 'absolute', right:0}}
                 >
                   <i style={{ fontSize: 30 }} className="fas fa-plus-circle" />
                 </div> */}

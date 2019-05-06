@@ -26,7 +26,7 @@ class CustomLaneHeader extends Component {
       titleCleanCopy: this.props.title,
       title: this.props.title
     };
-
+    
     this.store = this.props.CreateTabStore;
     this.globalStore = this.props.globalStore;
   }
@@ -70,7 +70,7 @@ class CustomLaneHeader extends Component {
           justifyContent: "space-between"
         }}
       >
-        <div style={{ fontSize: 14, fontWeight: "bold" }}>
+        <div>
           {this.state.editable ? (
             <div>
               <FormControl
@@ -85,11 +85,11 @@ class CustomLaneHeader extends Component {
           ) : (
             <div
               onClick={() => this.clickHandler()}
-              style={{ cursor: "pointer" }}
             >
-              <header>
+              <header style={{ cursor: "pointer", fontSize: 16, fontWeight: "bold" }}>
                 {this.state.title} <i className="fas fa-cog" />
               </header>
+              <div style={{fontSize:14, paddingTop: '2%'}}>{this.store.menus[`${this.store.menuSubStore.menuInView}`][`${this.props.title}`].type_description}</div>
             </div>
           )}
         </div>
