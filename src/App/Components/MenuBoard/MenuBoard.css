@@ -1,0 +1,11 @@
+/* style={
+    fontSize:14, paddingTop: '2%', display: 'inline-block', wordBreak: 'break-word' */
+.menu-board-category-description {
+    font-size: 14;
+    padding-top: 2%;
+}
+
+.menu-board-category-header {
+    display: inline-block;
+    word-break: break-word
+}

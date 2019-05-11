@@ -13,6 +13,7 @@ import Board from "react-trello";
 import { inject, observer } from "mobx-react";
 import { Image, FormControl, Button } from "react-bootstrap";
 import { toJS } from "mobx";
+import './MenuBoard.css';
 
 @inject("CreateTabStore")
 @inject("globalStore")
@@ -64,10 +65,11 @@ class CustomLaneHeader extends Component {
         style={{
           // borderBottom: '2px solid #c5c5c5',
           paddingBottom: 6,
-          marginBottom: 10,
+          // marginBottom: 10,
           display: "flex",
           flexDirection: "row",
-          justifyContent: "space-between"
+          justifyContent: "space-between",
+          width: 270
         }}
       >
         <div>
@@ -89,7 +91,7 @@ class CustomLaneHeader extends Component {
               <header style={{ cursor: "pointer", fontSize: 16, fontWeight: "bold" }}>
                 {this.state.title} <i className="fas fa-cog" />
               </header>
-              <div style={{fontSize:14, paddingTop: '2%'}}>{this.store.menus[`${this.store.menuSubStore.menuInView}`][`${this.props.title}`].type_description}</div>
+              <p className='menu-board-category-description'>{this.store.menus[`${this.store.menuSubStore.menuInView}`][`${this.props.title}`].type_description}</p>
             </div>
           )}
         </div>

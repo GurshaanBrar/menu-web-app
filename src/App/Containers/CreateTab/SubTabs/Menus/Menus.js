@@ -128,25 +128,16 @@ class Menus extends Component {
                 <h2 style={{ marginLeft: "3%", paddingBottom: "2%" }}>
                   {this.store.menuSubStore.menuInView}
                 </h2>
-                <div style={{marginLeft: '2%'}}>
-
-                <BootstrapSwitchButton
-                  checked={true}
-                  onlabel="Enabled"
-                  onstyle="success"
-                  offlabel="Disabled"
-                  offstyle="danger"
-                  onChange={(checked) => {
-                  }}
-                />
+                <div style={{ marginLeft: "2%" }}>
+                  <BootstrapSwitchButton
+                    checked={true}
+                    onlabel="Enabled"
+                    onstyle="success"
+                    offlabel="Disabled"
+                    offstyle="danger"
+                    onChange={checked => {}}
+                  />
                 </div>
-                {/* <div
-                  className="items-add-item"
-                  onClick={() => {}}
-                  style={{position: 'absolute', right:0}}
-                >
-                  <i style={{ fontSize: 30 }} className="fas fa-plus-circle" />
-                </div> */}
               </div>
             ) : (
               <MottoBox
@@ -155,8 +146,16 @@ class Menus extends Component {
               />
             )}
           </Col>
-          <Col xs="auto" md="auto" style={{ marginLeft: "3%" }}>
-            {this.state.menuSelected ? null : (
+          <Col xs="auto" md="auto" style={{marginTop: "1%", marginLeft: "3%" }}>
+            {this.state.menuSelected ? (
+              <div
+                className="items-add-item"
+                onClick={() => {}}
+                style={{position: 'absolute', right: 0 , width: '5%', marginTop: 20}}
+              >
+                <i style={{ fontSize: 30, padding: '10%'}} className="fas fa-cog" />
+              </div>
+            ) : (
               <div style={{ textAlign: "center" }}>
                 <img
                   src="https://www.freeiconspng.com/uploads/svg-png-ai-csh-ico-icns-svg-base64-png-base64-21.png"
