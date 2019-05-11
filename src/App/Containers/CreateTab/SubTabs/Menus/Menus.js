@@ -21,6 +21,12 @@ import ItemsPreview from "../../../../Components/ItemsPreview/ItemsPreview";
 import FontAwesome from "react-fontawesome";
 import MottoBox from "../../../../Components/MottoBox/MottoBox";
 import BootstrapSwitchButton from "bootstrap-switch-button-react";
+import HandHoldingModal from "../../../../Components/HandHoldingModal/HandHoldingModal";
+import {
+  ItemImageTemplate,
+  MenuCatTemplate,
+  DataTemplate
+} from "./ModalTemplates";
 import "./Menus.css";
 
 @inject("CreateTabStore")
@@ -37,6 +43,7 @@ class Menus extends Component {
 
     this.state = {
       show: false, // hides and shows modal for items
+      settingsShow: false, // hides and shows modal for the menus settings
       menuSelected: false // Flag if menu has be chosen, if false show all menus
     };
   }
@@ -57,16 +64,22 @@ class Menus extends Component {
       });
   }
 
-  // Des: closes the item modal
+  // Des: closes the item modal and settings modal
   // Post: show is set to false, modal is closed
   handleClose() {
-    this.setState({ show: false });
+    this.setState({ show: false, showSettings: false});
   }
 
   // Des: opens the item modal
-  // Post: show is set to true, modal is visible
+  // Post: show is set to true, modal is visible, ensures settings modal is closed
   handleShow() {
-    this.setState({ show: true });
+    this.setState({ show: true, showSettings: false });
+  }
+
+  // Des: opens the settings modal
+  // Post: showSettings is set to true, modal is visible, ensures item modal is closed
+  handleShowSettings() {
+    this.setState({ show: false, showSettings: true });
   }
 
   // Des: Handler for menus clickable, shows the menu which was clicked.
@@ -146,14 +159,26 @@ class Menus extends Component {
               />
             )}
           </Col>
-          <Col xs="auto" md="auto" style={{marginTop: "1%", marginLeft: "3%" }}>
+          <Col
+            xs="auto"
+            md="auto"
+            style={{ marginTop: "1%", marginLeft: "3%" }}
+          >
             {this.state.menuSelected ? (
               <div
                 className="items-add-item"
-                onClick={() => {}}
-                style={{position: 'absolute', right: 0 , width: '5%', marginTop: 20}}
+                onClick={() => {this.handleShowSettings()}}
+                style={{
+                  position: "absolute",
+                  right: 0,
+                  width: "5%",
+                  marginTop: 20
+                }}
               >
-                <i style={{ fontSize: 30, padding: '10%'}} className="fas fa-cog" />
+                <i
+                  style={{ fontSize: 30, padding: "10%" }}
+                  className="fas fa-cog"
+                />
               </div>
             ) : (
               <div style={{ textAlign: "center" }}>
@@ -214,6 +239,18 @@ class Menus extends Component {
           itemInView={this.store.menuSubStore.itemInView}
           handleClose={this.handleClose.bind(this)}
           show={this.state.show}
+        />
+
+        <HandHoldingModal
+          handleClose={this.handleClose.bind(this)}
+          show={this.state.showSettings}
+          title={"Menu Settings"}
+          handleSave={() => this.handleSave()}
+          pages={[
+            <DataTemplate
+              handleChange={(e, key) => this.setTempData(key, e.target.value)}
+            />
+          ]}
         />
       </div>
     );
