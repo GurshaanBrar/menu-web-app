@@ -8,11 +8,15 @@
  *      1) CustomLaneHeader
  *      2)
  */
+
 import React, { Component } from "react";
-import Board from "react-trello";
+// import Board from "react-trello";
 import { inject, observer } from "mobx-react";
 import { Image, FormControl, Button } from "react-bootstrap";
 import { toJS } from "mobx";
+import { Board } from 'react-trello';
+
+import './MenuBoard.css'
 
 @inject("CreateTabStore")
 @inject("globalStore")
@@ -23,12 +27,24 @@ class CustomLaneHeader extends Component {
 
     this.state = {
       editable: false,
+      dorpdown: false,
       titleCleanCopy: this.props.title,
       title: this.props.title
     };
 
     this.store = this.props.CreateTabStore;
     this.globalStore = this.props.globalStore;
+  }
+
+  handleDropdown() {
+    // opens the dropdown for editing
+    this.setState({dropdown: true})
+  }
+
+  handleDropdownOff() {
+    if(this.state.dropdown) {
+      this.setState({dropdown: false})
+    }
   }
 
   clickHandler() {
@@ -67,10 +83,9 @@ class CustomLaneHeader extends Component {
           marginBottom: 10,
           display: "flex",
           flexDirection: "row",
-          justifyContent: "space-between"
         }}
       >
-        <div style={{ fontSize: 14, fontWeight: "bold" }}>
+        <div style={{ fontSize: 14, fontWeight: "bold", minWidth: '100%'}}>
           {this.state.editable ? (
             <div>
               <FormControl
@@ -83,13 +98,30 @@ class CustomLaneHeader extends Component {
               <Button onClick={() => this.handleCancel()}>Cancel</Button>
             </div>
           ) : (
-            <div
-              onClick={() => this.clickHandler()}
-              style={{ cursor: "pointer" }}
-            >
-              <header>
-                {this.state.title} <i className="fas fa-cog" />
-              </header>
+            <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%'}}>
+              <div
+                onClick={() => this.clickHandler()}
+                style={{ cursor: "pointer"}}
+              >
+                <header>
+                  {this.state.title} <i className="fas fa-cog" />
+                </header>
+              </div>
+              <div 
+                onClick={() => this.handleDropdown()}
+                onMouseLeave={() => this.handleDropdownOff()}
+                style={{padding: 2}} 
+              >
+                <i className="fas fa-ellipsis-h" />
+                {this.state.dropdown? (
+                  <div style={{backgroundColor: 'grey', position: 'absolute', minWidth: 150, zIndex: 3, borderRadius: 5}}>
+                    <p className="option_first">hi im option 1</p>
+                    <p className="option">hey im option 2</p>
+                    <p className="option">uhh who am I?</p>
+                    <p className="option">new fone hoo dis</p>
+                  </div>
+                ) : null}
+              </div>
             </div>
           )}
         </div>

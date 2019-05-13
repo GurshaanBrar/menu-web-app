@@ -1,0 +1,14 @@
+.option {
+    margin: 0px;
+    padding: 1px;
+    border-bottom: 1px solid;
+    border-radius: 5px;
+}
+
+.option_first {
+    margin: 0px;
+    padding: 1px;
+    border-bottom: 1px solid;
+    border-top: 1px solid;
+    border-radius: 5px;
+}
