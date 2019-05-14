@@ -7,11 +7,8 @@ assignees: ''
 
 ---
 
-[
-The user story should have a reason to exist: what do I need as the user described in the summary?
-This part details any detail that could not be passed by the summary.
-]
-
+**As a** a user of menu-web-app, **I want** an 'Add Category' 
+component in create/menus **so that** I can add a new category to my menu.
 
 ### Acceptance Criteria
 
