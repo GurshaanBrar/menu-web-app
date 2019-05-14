@@ -1,14 +1,20 @@
 .option {
     margin: 0px;
-    padding: 1px;
+    padding: 4px;
     border-bottom: 1px solid;
-    border-radius: 5px;
+    border-radius: 3px;
+    border-color: #939393
 }
 
 .option_first {
     margin: 0px;
-    padding: 1px;
+    padding: 4px;
     border-bottom: 1px solid;
     border-top: 1px solid;
-    border-radius: 5px;
+    border-radius: 3px;
+    border-color: #939393
+}
+
+.option:hover, .option_first:hover {
+    background-color: whitesmoke
 }

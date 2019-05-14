@@ -28,6 +28,7 @@ class CustomLaneHeader extends Component {
     this.state = {
       editable: false,
       dorpdown: false,
+      isOption: false,
       titleCleanCopy: this.props.title,
       title: this.props.title
     };
@@ -45,6 +46,11 @@ class CustomLaneHeader extends Component {
     if(this.state.dropdown) {
       this.setState({dropdown: false})
     }
+  }
+
+  handleOption() {
+    this.setState({isOption: true});
+    alert(this.state.isOption);
   }
 
   clickHandler() {
@@ -114,17 +120,57 @@ class CustomLaneHeader extends Component {
               >
                 <i className="fas fa-ellipsis-h" />
                 {this.state.dropdown? (
-                  <div style={{backgroundColor: 'grey', position: 'absolute', minWidth: 150, zIndex: 3, borderRadius: 5}}>
-                    <p className="option_first">hi im option 1</p>
-                    <p className="option">hey im option 2</p>
-                    <p className="option">uhh who am I?</p>
-                    <p className="option">new fone hoo dis</p>
-                  </div>
+                  <CategoryDropdown 
+                    options={
+                      [
+                        ['option 1', () => this.handleOption()], 
+                        ['option 2', () => this.handleOption()],
+                        ['option 3', () => this.handleOption()]
+                      ]
+                    }
+                  />
                 ) : null}
               </div>
             </div>
           )}
         </div>
+      </div>
+    );
+  }
+}
+
+
+// TODO: set proptypes
+// pre: list of tuples of title and clickhandlers
+// post: render dropdown with linked actions
+class CategoryDropdown extends Component {
+  constructor(props) {
+    super(props);
+    this.options = this.props.options
+  }
+  render() {
+    return(
+      <div 
+        style={
+            {
+              backgroundColor: '#e3e3e3', 
+              position: 'absolute', 
+              minWidth: 150, 
+              zIndex: 3, 
+              borderRadius: 3, 
+              borderRight: 'solid', 
+              borderLeft: 'solid',
+              borderWidth: 1,
+              borderColor: '#939393',
+            }
+        }
+      >
+        {
+          this.options.map((item, i) => {
+            if(i==0) return (<p className="option_first" onClick={item[1]}>{item[0]}</p>);
+            else return (<p className="option" onClick={item[1]}>{item[0]}</p>);
+          })
+        }
       </div>
     );
   }
