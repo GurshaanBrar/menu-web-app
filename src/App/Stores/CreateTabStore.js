@@ -65,7 +65,28 @@ export class CreateTabStore {
     loading: true,
     itemInView: "",
     menuInView: "",
-    formattedCatagories: []
+
+    formattedCatagories: [],
+
+    menuTypes: [
+      // {
+      //   name: "Lunch",
+      //   uri:
+      //     "https://www.ycdsb.ca/sms/wp-content/uploads/sites/90/2017/10/lunch-1200x1200.jpeg"
+      // },
+      // {
+      //   name: "Brunch",
+      //   uri:
+      //     "https://images-na.ssl-images-amazon.com/images/I/61n8O21K6vL._SX258_BO1,204,203,200_.jpg"
+      // },
+      // {
+      //   name: "Dinner",
+      //   uri:
+      //     "https://images-na.ssl-images-amazon.com/images/I/61O6jnlbiTL._SX258_BO1,204,203,200_.jpg"
+      // }
+    ],
+    isNewMenu: false,
+    newMenuData: {},
   };
   // ==================== OBSERVABLES DECLARATION: END ==================== //
 
@@ -501,6 +522,21 @@ export class CreateTabStore {
       .catch(err => {
         console.log(`Error at writeItems() in CreateTabStore.js: ${err}`);
       });
+  }
+  // Ref: HandHoldingModal.js
+  // Des: Updates Menu data with category id and title and items included
+  // Pre: Menu id must be valid
+  // Post: if succesful, menus document will be updated to have the new category and data
+  @action
+  addCat() {
+    this.menuSubStore.menuCats.push({
+      id: "New Category",
+      title: "New Category",
+      cards: []
+    });
+
+    // TODO: make a call to firebase to add the new category
+    // but invole the handholding model for the best category
   }
 
   // Ref: MenuBoard.js

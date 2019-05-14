@@ -8,11 +8,15 @@
  *      1) CustomLaneHeader
  *      2)
  */
+
 import React, { Component } from "react";
-import Board from "react-trello";
+// import Board from "react-trello";
 import { inject, observer } from "mobx-react";
 import { Image, FormControl, Button } from "react-bootstrap";
 import { toJS } from "mobx";
+import { Board } from 'react-trello';
+
+import './MenuBoard.css'
 
 @inject("CreateTabStore")
 @inject("globalStore")
@@ -23,12 +27,30 @@ class CustomLaneHeader extends Component {
 
     this.state = {
       editable: false,
+      dorpdown: false,
+      isOption: false,
       titleCleanCopy: this.props.title,
       title: this.props.title
     };
     
     this.store = this.props.CreateTabStore;
     this.globalStore = this.props.globalStore;
+  }
+
+  handleDropdown() {
+    // opens the dropdown for editing
+    this.setState({dropdown: true})
+  }
+
+  handleDropdownOff() {
+    if(this.state.dropdown) {
+      this.setState({dropdown: false})
+    }
+  }
+
+  handleOption() {
+    this.setState({isOption: true});
+    alert(this.state.isOption);
   }
 
   clickHandler() {
@@ -67,10 +89,13 @@ class CustomLaneHeader extends Component {
           marginBottom: 10,
           display: "flex",
           flexDirection: "row",
-          justifyContent: "space-between"
         }}
       >
+// <<<<<<< handholder
+//         <div style={{ fontSize: 14, fontWeight: "bold", minWidth: '100%'}}>
+// =======
         <div>
+// >>>>>>> master
           {this.state.editable ? (
             <div>
               <FormControl
@@ -83,6 +108,35 @@ class CustomLaneHeader extends Component {
               <Button onClick={() => this.handleCancel()}>Cancel</Button>
             </div>
           ) : (
+// <<<<<<< handholder
+//             <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%'}}>
+//               <div
+//                 onClick={() => this.clickHandler()}
+//                 style={{ cursor: "pointer"}}
+//               >
+//                 <header>
+//                   {this.state.title} <i className="fas fa-cog" />
+//                 </header>
+//               </div>
+//               <div 
+//                 onClick={() => this.handleDropdown()}
+//                 onMouseLeave={() => this.handleDropdownOff()}
+//                 style={{padding: 2}} 
+//               >
+//                 <i className="fas fa-ellipsis-h" />
+//                 {this.state.dropdown? (
+//                   <CategoryDropdown 
+//                     options={
+//                       [
+//                         ['option 1', () => this.handleOption()], 
+//                         ['option 2', () => this.handleOption()],
+//                         ['option 3', () => this.handleOption()]
+//                       ]
+//                     }
+//                   />
+//                 ) : null}
+//               </div>
+// =======
             <div
               onClick={() => this.clickHandler()}
             >
@@ -93,6 +147,43 @@ class CustomLaneHeader extends Component {
             </div>
           )}
         </div>
+      </div>
+    );
+  }
+}
+
+
+// TODO: set proptypes
+// pre: list of tuples of title and clickhandlers
+// post: render dropdown with linked actions
+class CategoryDropdown extends Component {
+  constructor(props) {
+    super(props);
+    this.options = this.props.options
+  }
+  render() {
+    return(
+      <div 
+        style={
+            {
+              backgroundColor: '#e3e3e3', 
+              position: 'absolute', 
+              minWidth: 150, 
+              zIndex: 3, 
+              borderRadius: 3, 
+              borderRight: 'solid', 
+              borderLeft: 'solid',
+              borderWidth: 1,
+              borderColor: '#939393',
+            }
+        }
+      >
+        {
+          this.options.map((item, i) => {
+            if(i==0) return (<p className="option_first" onClick={item[1]}>{item[0]}</p>);
+            else return (<p className="option" onClick={item[1]}>{item[0]}</p>);
+          })
+        }
       </div>
     );
   }
