@@ -1,16 +1,16 @@
 /*
-*  Menus.js
-*
-*  Description:
-*      This class renders the menu board for a places menus. A user first sees all their menus, if they click
-*      one they are taken to that menus board, which shows the child parent relationship between categories
-*      and items.
-*
-*  Sections:
-*      1. CONSTRUCTOR
-*      2. FUNCTIONS
-*      3. RENDER
-*/
+ *  Menus.js
+ *
+ *  Description:
+ *      This class renders the menu board for a places menus. A user first sees all their menus, if they click
+ *      one they are taken to that menus board, which shows the child parent relationship between categories
+ *      and items.
+ *
+ *  Sections:
+ *      1. CONSTRUCTOR
+ *      2. FUNCTIONS
+ *      3. RENDER
+ */
 
 import React, { Component } from "react";
 import MenuBoard from "../../../../Components/MenuBoard/MenuBoard";
@@ -19,9 +19,6 @@ import { Row, Col, Button } from "react-bootstrap";
 import ItemModal from "../../../../Components/ItemModal/ItemModal";
 import ItemsPreview from "../../../../Components/ItemsPreview/ItemsPreview";
 import FontAwesome from "react-fontawesome";
-import HandHoldingModal from '../../../../Components/HandHoldingModal/HandHoldingModal';
-import { NameAndPhoto, Categories, ItemAdder } from './ModalPages';
-import SearchBar from '../../../../Components/SearchBar/SearchBar';
 import MottoBox from "../../../../Components/MottoBox/MottoBox";
 import BootstrapSwitchButton from "bootstrap-switch-button-react";
 import "./Menus.css";
@@ -224,30 +221,4 @@ class Menus extends Component {
   }
 }
 
-                <HandHoldingModal
-                    handleClose={this.handleCloseNewMenu.bind(this)}
-                    show={this.state.addMenu}
-                    title={'New Menu'}
-                    handleSave={() => {}}
-                    pages={[
-                    <NameAndPhoto 
-                        name={null}
-                        icon_uri={null}
-                        handleChangeName={e => this.store.setMenuData('name', e.target.value)}
-                        handleChangePhoto={e => this.store.setMenuData('uri', e.target.value)}
-                    />,
-                    <Categories 
-                        categories={this.store.menuSubStore.newMenuData.cats}
-                        handleChange={e => this.store.setMenuData('cats', e)}
-                    />,
-                    <ItemAdder
-                        categories={this.store.menuSubStore.newMenuData}
-
-                    />
-                    ]}
-                />
-                </div>
-            );
-        }
-}
 export default Menus;
