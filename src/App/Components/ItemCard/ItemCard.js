@@ -27,7 +27,7 @@ class ItemCard extends React.Component {
     this.setState({ varClassName: "", blur: false });
   };
 
-  _clickHandler = () => {
+  _clickHandler = () => {    
     if (this.props.isItem) {
       // add index so we can change local copy
       var tempObj = this.props.data;

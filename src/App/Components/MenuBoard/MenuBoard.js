@@ -32,7 +32,7 @@ class CustomLaneHeader extends Component {
       titleCleanCopy: this.props.title,
       title: this.props.title
     };
-
+    
     this.store = this.props.CreateTabStore;
     this.globalStore = this.props.globalStore;
   }
@@ -91,7 +91,11 @@ class CustomLaneHeader extends Component {
           flexDirection: "row",
         }}
       >
-        <div style={{ fontSize: 14, fontWeight: "bold", minWidth: '100%'}}>
+// <<<<<<< handholder
+//         <div style={{ fontSize: 14, fontWeight: "bold", minWidth: '100%'}}>
+// =======
+        <div>
+// >>>>>>> master
           {this.state.editable ? (
             <div>
               <FormControl
@@ -104,33 +108,42 @@ class CustomLaneHeader extends Component {
               <Button onClick={() => this.handleCancel()}>Cancel</Button>
             </div>
           ) : (
-            <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%'}}>
-              <div
-                onClick={() => this.clickHandler()}
-                style={{ cursor: "pointer"}}
-              >
-                <header>
-                  {this.state.title} <i className="fas fa-cog" />
-                </header>
-              </div>
-              <div 
-                onClick={() => this.handleDropdown()}
-                onMouseLeave={() => this.handleDropdownOff()}
-                style={{padding: 2}} 
-              >
-                <i className="fas fa-ellipsis-h" />
-                {this.state.dropdown? (
-                  <CategoryDropdown 
-                    options={
-                      [
-                        ['option 1', () => this.handleOption()], 
-                        ['option 2', () => this.handleOption()],
-                        ['option 3', () => this.handleOption()]
-                      ]
-                    }
-                  />
-                ) : null}
-              </div>
+// <<<<<<< handholder
+//             <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%'}}>
+//               <div
+//                 onClick={() => this.clickHandler()}
+//                 style={{ cursor: "pointer"}}
+//               >
+//                 <header>
+//                   {this.state.title} <i className="fas fa-cog" />
+//                 </header>
+//               </div>
+//               <div 
+//                 onClick={() => this.handleDropdown()}
+//                 onMouseLeave={() => this.handleDropdownOff()}
+//                 style={{padding: 2}} 
+//               >
+//                 <i className="fas fa-ellipsis-h" />
+//                 {this.state.dropdown? (
+//                   <CategoryDropdown 
+//                     options={
+//                       [
+//                         ['option 1', () => this.handleOption()], 
+//                         ['option 2', () => this.handleOption()],
+//                         ['option 3', () => this.handleOption()]
+//                       ]
+//                     }
+//                   />
+//                 ) : null}
+//               </div>
+// =======
+            <div
+              onClick={() => this.clickHandler()}
+            >
+              <header style={{ cursor: "pointer", fontSize: 16, fontWeight: "bold" }}>
+                {this.state.title} <i className="fas fa-cog" />
+              </header>
+              <div style={{fontSize:14, paddingTop: '2%'}}>{this.store.menus[`${this.store.menuSubStore.menuInView}`][`${this.props.title}`].type_description}</div>
             </div>
           )}
         </div>
@@ -215,14 +228,16 @@ class CustomCard extends Component {
   }
 
   handleDelete(e) {
+    console.log(this.props);
+    
     e.stopPropagation(); //stops parent onClick from also firing.
     //To remove a card
     eventBus.publish({
       type: "REMOVE_CARD",
-      laneId: this.props.category,
+      laneId: this.props.laneId,
       cardId: this.props.id
     });
-    this.store.writeMenus(this.globalStore.placeId, this.props.menu, this.props.category, this.props.id);
+    this.store.writeMenus(this.globalStore.placeId, this.store.menuSubStore.menuInView, this.props.laneId, this.props.id);
   }
 
   render() {
@@ -296,14 +311,15 @@ export default class MenuBoard extends Component {
             this.store.menuSubStore.menuInView,
             cardId,
             sourceLaneId,
-            targetLaneId
+            targetLaneId,
+            position,
           );
-          console.log(cardDetails.breadcrumb + "category");
-          this.store.setItems(
-            `${cardDetails.breadcrumb}.category`,
-            targetLaneId
-          );
-          this.store.setFormattedCategories();
+          // console.log(cardDetails.breadcrumb + "category");
+          // this.store.setItems(
+          //   `${cardDetails.breadcrumb}.category`,
+          //   targetLaneId
+          // );
+          // this.store.setFormattedCategories();
         }}
         style={{ backgroundColor: "inherit" }}
       >
