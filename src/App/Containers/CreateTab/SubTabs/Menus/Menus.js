@@ -22,11 +22,8 @@ import FontAwesome from "react-fontawesome";
 import MottoBox from "../../../../Components/MottoBox/MottoBox";
 import BootstrapSwitchButton from "bootstrap-switch-button-react";
 import HandHoldingModal from "../../../../Components/HandHoldingModal/HandHoldingModal";
-import {
-  ItemImageTemplate,
-  MenuCatTemplate,
-  DataTemplate
-} from "./ModalTemplates";
+import MenuPreview from "../../../../Components/MenuPreview/MenuPreview";
+import { DataTemplate } from "./ModalTemplates";
 import "./Menus.css";
 
 @inject("CreateTabStore")
@@ -44,8 +41,11 @@ class Menus extends Component {
     this.state = {
       show: false, // hides and shows modal for items
       settingsShow: false, // hides and shows modal for the menus settings
-      menuSelected: false // Flag if menu has be chosen, if false show all menus
+      menuSelected: false, // Flag if menu has be chosen, if false show all menus
+      tempData: {} // Gets updates as user fills out HHM, when save this gets written to store
     };
+
+    console.log(this.state);
   }
 
   // ========== FUNCTIONS ========== //
@@ -67,7 +67,7 @@ class Menus extends Component {
   // Des: closes the item modal and settings modal
   // Post: show is set to false, modal is closed
   handleClose() {
-    this.setState({ show: false, showSettings: false});
+    this.setState({ show: false, showSettings: false });
   }
 
   // Des: opens the item modal
@@ -85,8 +85,11 @@ class Menus extends Component {
   // Des: Handler for menus clickable, shows the menu which was clicked.
   // Post: The items in will be sorted and menuSelected will be set to true,
   //       menus board will be visible
-  handleMenuShow() {
+  handleMenuShow(name) {
+    console.log(name);
+
     // sorts items based on menuInView
+    this.store.setMenuInView(name);
     this.store.setFormattedCategories();
     this.setState({ menuSelected: true });
   }
@@ -97,24 +100,54 @@ class Menus extends Component {
     this.setState({ menuSelected: false });
   }
 
+  // Des: Sets the key in tempData to the new value
+  // Pre: key must be string, value should be correct type for key
+  // Post: states tempData will be updated with new key/value
+  setTempData(key, value) {
+    let placeholder = this.state.tempData;
+
+    placeholder[`${key}`] = value;
+
+    this.setState({
+      tempData: placeholder
+    });
+  }
+
+  handleSave() {
+    // do some validation here!!!!!
+
+    this.store.writeMenuSettings(
+      this.globalStore.placeId,
+      this.store.menuSubStore.menuInView,
+      this.state.tempData
+    );
+
+    // close the modal
+    this.handleClose();
+  }
+
   // ========== RENDER ========== //
 
   render() {
     // if there is no menu selected (all menus are shown), map menus from store
     // and assign a random image to it.
-    if (!this.state.menuSelected) {
-      var tempMenus = [];
-      let stockImages = [
-        "https://www.stockvault.net/data/2010/11/24/116237/preview16.jpg",
-        "https://www.stockvault.net/data/2012/07/27/133058/preview16.jpg"
-      ];
-      let count = 0;
+    // if (!this.state.menuSelected) {
+    //   var tempMenus = [];
+    //   let catCount = 0;
+    //   let count = 0;
 
-      for (let m in this.store.menus) {
-        tempMenus.push({ name: m, uri: stockImages[count] });
-        count++;
-      }
-    }
+    //   for (let m in this.store.menus) {
+    //     for(let cat in this.store.menus[`${m}`]) {
+    //       if(cat !== 'time_active') {
+    //         this.store.menus
+    //       }
+    //     }
+    //     console.log(Object.keys(this.store.menus[`${m}`]).length - 1);
+
+    //     tempMenus.push({ name: m, uri: stockImages[count] });
+    //     count++;
+    //   }
+    // }
 
     return (
       <div>
@@ -167,7 +200,9 @@ class Menus extends Component {
             {this.state.menuSelected ? (
               <div
                 className="items-add-item"
-                onClick={() => {this.handleShowSettings()}}
+                onClick={() => {
+                  this.handleShowSettings();
+                }}
                 style={{
                   position: "absolute",
                   right: 0,
@@ -182,12 +217,12 @@ class Menus extends Component {
               </div>
             ) : (
               <div style={{ textAlign: "center" }}>
-                <img
+                {/* <img
                   src="https://www.freeiconspng.com/uploads/svg-png-ai-csh-ico-icns-svg-base64-png-base64-21.png"
                   alt="food"
                   width="200"
                   height="200"
-                />
+                /> */}
               </div>
             )}
           </Col>
@@ -215,20 +250,28 @@ class Menus extends Component {
               </div>
             </Col>
           ) : (
-            <div
-              style={{
-                marginLeft: "5%",
-                marginRight: "5%",
-                marginBottom: "1%",
-                marginTop: "1%",
-                cursor: "pointer"
-              }}
-            >
-              <ItemsPreview
-                listOfItems={tempMenus}
-                handleShow={this.handleMenuShow.bind(this)}
-                item={false}
-              />
+            <div className="menus-menu-previews">
+              {this.store.menusStats.map(el => {
+                return (
+                  <div
+                    onClick={() => this.handleMenuShow(el.name)}
+                    key={`${el.name}`}
+                    style={{
+                      marginLeft: 10,
+                      marginRight: 10,
+                      cursor: "pointer"
+                    }}
+                  >
+                    <MenuPreview
+                      menuTitle={`${el.name}`}
+                      numItems={`${el.numItems} items`}
+                      numCats={`${el.numCategories} categories`}
+                      isActive={el.isActive}
+                      timeActive={`${el.timeActive.start}`}
+                    />
+                  </div>
+                );
+              })}
             </div>
           )}
         </Row>
@@ -241,17 +284,25 @@ class Menus extends Component {
           show={this.state.show}
         />
 
-        <HandHoldingModal
-          handleClose={this.handleClose.bind(this)}
-          show={this.state.showSettings}
-          title={"Menu Settings"}
-          handleSave={() => this.handleSave()}
-          pages={[
-            <DataTemplate
-              handleChange={(e, key) => this.setTempData(key, e.target.value)}
-            />
-          ]}
-        />
+        {this.state.menuSelected ? (
+          <HandHoldingModal
+            handleClose={this.handleClose.bind(this)}
+            show={this.state.showSettings}
+            title={"Menu Settings"}
+            handleSave={() => this.handleSave()}
+            pages={[
+              <DataTemplate
+                menuData={this.store.menusStats.filter(men => {
+                  if (men.name === this.store.menuSubStore.menuInView) {
+                    console.log(men)
+                    return men;
+                  }
+                })}
+                handleChange={(key, value) => this.setTempData(key, value)}
+              />
+            ]}
+          />
+        ) : null}
       </div>
     );
   }

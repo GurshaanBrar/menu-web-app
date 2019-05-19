@@ -139,6 +139,7 @@ class ItemModal extends Component {
         dialogClassName={tempClassName}
         show={this.props.show}
         onHide={() => this.props.handleClose()}
+        animation={false}
       >
         <Modal.Header closeButton>
           <Modal.Title>{this.props.itemInView.name}</Modal.Title>
@@ -171,6 +172,30 @@ class ItemModal extends Component {
                     {this.state.editArea === "name"
                       ? editor_text
                       : this.props.itemInView.name}
+                  </Col>
+                </Row>
+              </div>
+              <hr />
+
+              <a
+                onClick={e => this._handleClick(e, this.props.itemInView.uri)}
+                className="items-preview-custom-atag"
+              >
+                <Row>
+                  <Col xs={9} md={10}>
+                    Uri
+                  </Col>
+                  <Col xs={3} md={2}>
+                    <i className={this.editIcon} />
+                  </Col>
+                </Row>
+              </a>
+              <div style={{ paddingTop: "4%" }}>
+                <Row style={{wordWrap:'break-word'}}>
+                  <Col md={12}>
+                    {this.state.editArea === "uri"
+                      ? editor_text
+                      : this.props.itemInView.uri}
                   </Col>
                 </Row>
               </div>
@@ -229,7 +254,7 @@ class ItemModal extends Component {
               <hr />
               <Button
                 onClick={() => this.props._handleDelete()}
-                bsStyle="danger"
+                variant="danger"
                 style={{ marginLeft: "2%" }}
               >
                 Delete

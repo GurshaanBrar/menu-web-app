@@ -27,6 +27,12 @@ div.col {
   padding-right: 0;
 }
 
+/* adds fade to modal */
+.modal-backdrop
+{
+    opacity:0.5 !important;
+}
+
 /*
   used for the menus board, controles height of each lane
   needed space for search bar above so forces height to shrink

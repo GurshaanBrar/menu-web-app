@@ -33,6 +33,7 @@ export class CreateTabStore {
   //  Store for all tabs under CreateTab
   @observable items = []; // All items
   @observable menus = {}; // list of menu names for a place
+  @observable menusStats = [];
   @observable menuCategories = []; // List of categories for a menu
   @observable menusTree = []; // Preserves relationship between menus -> categories -> and items
 
@@ -228,14 +229,16 @@ export class CreateTabStore {
 
       // make new lane for each known category
       for (let m in toJS(this.menus[`${menuName}`])) {
-        // adds cat to know categories
-        categories.push(m);
+        if (m !== "time_active") {
+          // adds cat to know categories
+          categories.push(m);
 
-        tempCats.push({
-          id: m,
-          title: m,
-          cards: []
-        });
+          tempCats.push({
+            id: m,
+            title: m,
+            cards: []
+          });
+        }
       }
 
       // iterate through each cat
@@ -421,7 +424,29 @@ export class CreateTabStore {
           if (res.exists) {
             // map data() to local var
             let data = res.data();
+
             this.menus = data;
+
+            for (let men in this.menus) {
+              let itemCount = 0;
+              let catCount = 0;
+
+              for (let cat in this.menus[`${men}`]) {
+                if (cat !== "time_active") {
+                  catCount++;
+                  itemCount =
+                    itemCount + this.menus[`${men}`][`${cat}`].items.length;
+                }
+              }
+
+              this.menusStats.push({
+                name: men,
+                numCategories: catCount,
+                numItems: itemCount,
+                timeActive: this.menus[`${men}`].time_active,
+                isActive: true
+              });
+            }
 
             // loading finished
             this.menuSubStore.loading = false;
@@ -630,6 +655,57 @@ export class CreateTabStore {
 
     // write to db
     RequestHandler.setDocument("Menus", placeId, newMenu);
+  }
+
+  @action
+  writeMenuSettings(placeId, menu, newData) {
+    let dataKeys = Object.keys(newData);
+
+    // If the old key exists replace it make sure new data is not null
+    if (menu in this.menus && dataKeys.length >= 1) {
+      
+      // Make sure the new menu name is not the same as the old update the name
+      if (menu !== newData.name && dataKeys.indexOf('name') >= 0 && newData.name !=="") {
+        // Taken from stack overflow. does some magic to delete and add keys
+        Object.defineProperty(
+          this.menus,
+          newData.name,
+          Object.getOwnPropertyDescriptor(this.menus, menu)
+        );
+
+        // delete the old key
+        delete this.menus[menu];
+
+        // Update all local caches.
+        this.menuCategories = this.menuCategories.filter(e => e !== menu);
+        this.menuCategories.push(newData.name);
+        this.menuSubStore.menuInView = newData.name;
+        this.setFormattedCategories();
+
+        for(let m of this.menusStats) {          
+          if(m.name === menu) {
+            m.name = newData.name;
+          }
+        }        
+      }
+
+      if(dataKeys.indexOf('start')>= 0) {
+        this.menus[menu].time_active.start = newData.start;
+      }
+
+      if(dataKeys.indexOf('duration')>= 0) {
+        this.menus[menu].time_active.duration = newData.duration;
+      }
+
+      RequestHandler.setDocument("Menus", placeId, this.menus)
+      .then(res => {
+        console.log("Menus updated");
+      })
+      .catch(err => {
+        console.log(`Error at writeItems() in CreateTabStore.js: ${err}`);
+      });
+    }
+    console.log(this.menus);
   }
   // ==================== WRITES TO DATABASE: END ==================== //
 

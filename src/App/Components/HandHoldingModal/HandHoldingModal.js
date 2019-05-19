@@ -44,7 +44,7 @@ class HandHoldingModal extends Component {
   }
 
   handleSave() {
-    this.setState({pageInView: 0}) 
+    this.setState({ pageInView: 0 });
     this.props.handleSave();
   }
 
@@ -62,53 +62,79 @@ class HandHoldingModal extends Component {
         dialogClassName={tempClassName}
         show={this.props.show}
         onHide={() => this.props.handleClose()}
+        animation={false}
       >
-        <Modal.Header closeButton>
+        <Modal.Header
+          closeButton
+        >
           <Modal.Title>{this.props.title}</Modal.Title>
         </Modal.Header>
         <Modal.Body style={{ minHeight: "55vh", backgroundColor: "#f8f8f8" }}>
           <Row>{this.state.pages[`${this.state.pageInView}`]}</Row>
         </Modal.Body>
-        <Modal.Footer
-          style={{
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "#f8f8f8",
-            display: "flex",
-            flexDirection: "row"
-          }}
-        >
-          {this.state.pageInView > 0 ? (
-            <Button
-              onClick={() => this._goBack()}
-              style={{ marginRight: "2%" }}
+        <Modal.Footer style={{ backgroundColor: "#f8f8f8" }}>
+          {this.state.pages.length > 1 ? (
+            <div
+              style={{
+                alignItems: "center",
+                justifyContent: "center",
+                display: "flex",
+                flexDirection: "row"
+              }}
             >
-              Back
-            </Button>
+              {this.state.pageInView > 0 ? (
+                <Button
+                  onClick={() => this._goBack()}
+                  style={{ marginRight: "2%" }}
+                >
+                  Back
+                </Button>
+              ) : (
+                <Button disabled style={{ marginRight: "2%" }}>
+                  Back
+                </Button>
+              )}
+              {this.state.pages.map((obj, count) => {
+                if (this.state.pageInView >= count) {
+                  return <div key={count} className="circleBase filled" />;
+                } else {
+                  return <div key={count} className="circleBase" />;
+                }
+              })}
+              {this.state.pageInView >= this.state.pages.length - 1 ? (
+                <Button
+                  onClick={() => this.handleSave()}
+                  variant="primary"
+                  style={{ marginLeft: "2%" }}
+                >
+                  Save
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => this._goForeword()}
+                  variant="primary"
+                  style={{ marginLeft: "2%" }}
+                >
+                  Next
+                </Button>
+              )}
+            </div>
           ) : (
-            <Button disabled style={{ marginRight: "2%" }}>
-              Back
-            </Button>
-          )}
-          {this.state.pages.map((obj, count) => {
-            if (this.state.pageInView >= count) {
-              return <div key={count} className="circleBase filled" />;
-            } else {
-              return <div key={count} className="circleBase" />;
-            }
-          })}
-          {this.state.pageInView >= this.state.pages.length - 1 ? (
-            <Button onClick={() => this.handleSave()} bsStyle="primary" style={{ marginLeft: "2%" }}>
-              Save
-            </Button>
-          ) : (
-            <Button
-              onClick={() => this._goForeword()}
-              bsStyle="primary"
-              style={{ marginLeft: "2%" }}
+            <div
+              style={{
+                alignItems: "center",
+                justifyContent: "center",
+                display: "flex"
+              }}
             >
-              Next
-            </Button>
+              <Button
+                onClick={() => this.handleSave()}
+                variant="primary"
+                style={{ marginLeft: "2%" }}
+              >
+                Save
+              </Button>
+            </div>
           )}
         </Modal.Footer>
       </Modal>

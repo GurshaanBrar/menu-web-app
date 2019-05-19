@@ -295,7 +295,7 @@ class HoursTemplate extends Component {
         temp[day] = e.target.value;
         
         this.setState({"open_hours": temp})
-        this.props.handleChange(`hours.${day}.open`, moment(`${e.target.value}:${this.state.open_mins[day]}`, "HH:mm").format('h:mm a'));
+        this.props.handleChange(`hours.${day}.open`, moment(`${e.target.value}:${this.state.open_mins}`, "HH:mm").format('h:mm a'));
         break;
 
       case "open_mins":
@@ -303,7 +303,7 @@ class HoursTemplate extends Component {
         temp[day] = e.target.value;
         
         this.setState({"open_mins": temp});
-        this.props.handleChange(`hours.${day}.open`, moment(`${this.state.open_hours[day]}:${e.target.value}`, "HH:mm").format('h:mm a'));
+        this.props.handleChange(`hours.${day}.open`, moment(`${this.state.open_hours}:${e.target.value}`, "HH:mm").format('h:mm a'));
         break;
 
       case "open_for_hours":
@@ -311,7 +311,7 @@ class HoursTemplate extends Component {
         temp[day] = e.target.value;
         
         this.setState({"open_for_hours": temp});
-        this.props.handleChange(`hours.${day}.open_for`, moment(`${e.target.value}:${this.state.open_for_mins[day]}`, "HH:mm").format('h:mm a'));
+        this.props.handleChange(`hours.${day}.open_for`, moment(`${e.target.value}:${this.state.open_for_mins}`, "HH:mm").format('h:mm a'));
         break;
 
       case "open_for_mins":
@@ -319,7 +319,7 @@ class HoursTemplate extends Component {
         temp[day] = e.target.value;
         
         this.setState({"open_for_mins": temp});
-        this.props.handleChange(`hours.${day}.open_for`, moment(`${this.state.open_for_hours[day]}:${e.target.value}`, "HH:mm").format('h:mm a'));
+        this.props.handleChange(`hours.${day}.open_for`, moment(`${this.state.open_for_hours}:${e.target.value}`, "HH:mm").format('h:mm a'));
         break;
     
       default:
@@ -357,7 +357,7 @@ class HoursTemplate extends Component {
                   </p>
                   <div style={{ marginRight: "1%" }}>
                     <FormControl
-                      componentClass="select"
+                      as="select"
                       onChange={(e) => this.handleChange(e, "open_hours", count)}
                     >
                       <option>{this.state.open_hours[count]}</option>
@@ -371,7 +371,7 @@ class HoursTemplate extends Component {
                   </p>
                   <div style={{ marginRight: "1%" }}>
                     <FormControl
-                      componentClass="select"
+                      as="select"
                       onChange={(e) => this.handleChange(e, "open_mins", count)}
                     >
                       <option>{this.state.open_mins[count]}</option>
@@ -385,7 +385,7 @@ class HoursTemplate extends Component {
                   </p>
                   <div style={{ marginRight: "1%" }}>
                     <FormControl
-                      componentClass="select"
+                      as="select"
                       onChange={(e) => this.handleChange(e, "open_for_hours", count)}
                     >
                       <option>{this.state.open_for_hours[count]}</option>
@@ -399,7 +399,7 @@ class HoursTemplate extends Component {
                   </p>
                   <div style={{ marginRight: "1%" }}>
                     <FormControl
-                      componentClass="select"
+                      as="select"
                       onChange={(e) => this.handleChange(e, "open_for_mins", count)}
                     >
                       <option>{this.state.open_for_mins[count]}</option>

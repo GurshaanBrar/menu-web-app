@@ -20,6 +20,15 @@
     width:500
 }
 
+.menus-menu-previews {
+	display: flex;
+	flex-flow: row wrap;
+    margin-left: 5%;
+    margin-right: 5%;
+    margin-bottom: 1%;
+    margin-top: 1%;
+}
+
 /* overwrite react-switch-button */
 div.btn {
     width:80px;

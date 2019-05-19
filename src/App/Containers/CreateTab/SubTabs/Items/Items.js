@@ -85,7 +85,7 @@ class Items extends Component {
 
   // Des: Shows old item modal, ensures new item modal is closed
   // Post show is set to true and newShow is set to false
-  handleShow() {
+  handleShow() {   
     this.setState({ show: true, newShow: false });
   }
 
